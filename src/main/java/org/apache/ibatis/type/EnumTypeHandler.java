@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,12 +20,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * @author Clinton Begin
+ */
 public class EnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E> {
 
-  private Class<E> type;
+  private final Class<E> type;
 
   public EnumTypeHandler(Class<E> type) {
-    if (type == null) throw new IllegalArgumentException("Type argument cannot be null");
+    if (type == null) {
+      throw new IllegalArgumentException("Type argument cannot be null");
+    }
     this.type = type;
   }
 

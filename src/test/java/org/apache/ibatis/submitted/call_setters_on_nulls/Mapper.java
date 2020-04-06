@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,12 +15,19 @@
  */
 package org.apache.ibatis.submitted.call_setters_on_nulls;
 
+import java.util.List;
 import java.util.Map;
 
 public interface Mapper {
 
   User getUserMapped(Integer id);
+
   User getUserUnmapped(Integer id);
+
   Map getUserInMap(Integer id);
+
+  List<Map<String, Object>> getNameOnly();
+
+  List<Map<String, Object>> getNameOnlyMapped();
 
 }

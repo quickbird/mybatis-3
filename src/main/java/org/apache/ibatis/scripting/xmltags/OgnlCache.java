@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,54 +13,49 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package org.apache.ibatis.scripting.xmltags;
 
-import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ognl.ExpressionSyntaxException;
-import ognl.Node;
 import ognl.Ognl;
 import ognl.OgnlException;
-import ognl.OgnlParser;
-import ognl.ParseException;
-import ognl.TokenMgrError;
 
 import org.apache.ibatis.builder.BuilderException;
 
 /**
- * 
- * Caches OGNL parsed expressions. Have a look at
- * http://code.google.com/p/mybatis/issues/detail?id=342
- * 
+ * Caches OGNL parsed expressions.
+ *
+ * @author Eduardo Macarron
+ *
+ * @see <a href='http://code.google.com/p/mybatis/issues/detail?id=342'>Issue 342</a>
  */
-public class OgnlCache {
+public final class OgnlCache {
 
-  private static final Map<String, ognl.Node> expressionCache = new ConcurrentHashMap<String, ognl.Node>();
+  private static final OgnlMemberAccess MEMBER_ACCESS = new OgnlMemberAccess();
+  private static final OgnlClassResolver CLASS_RESOLVER = new OgnlClassResolver();
+  private static final Map<String, Object> expressionCache = new ConcurrentHashMap<>();
+
+  private OgnlCache() {
+    // Prevent Instantiation of Static Class
+  }
 
   public static Object getValue(String expression, Object root) {
     try {
-      return Ognl.getValue(parseExpression(expression), root);
+      Map context = Ognl.createDefaultContext(root, MEMBER_ACCESS, CLASS_RESOLVER, null);
+      return Ognl.getValue(parseExpression(expression), context, root);
     } catch (OgnlException e) {
       throw new BuilderException("Error evaluating expression '" + expression + "'. Cause: " + e, e);
     }
   }
 
   private static Object parseExpression(String expression) throws OgnlException {
-    try {
-      Node node = expressionCache.get(expression);
-      if (node == null) {
-        node = new OgnlParser(new StringReader(expression)).topLevelExpression();
-        expressionCache.put(expression, node);
-      }
-      return node;
-    } catch (ParseException e) {
-      throw new ExpressionSyntaxException(expression, e);
-    } catch (TokenMgrError e) {
-      throw new ExpressionSyntaxException(expression, e);
+    Object node = expressionCache.get(expression);
+    if (node == null) {
+      node = Ognl.parseExpression(expression);
+      expressionCache.put(expression, node);
     }
+    return node;
   }
 
 }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,14 @@ import java.util.Locale;
 
 import org.apache.ibatis.reflection.ReflectionException;
 
-public class PropertyNamer {
+/**
+ * @author Clinton Begin
+ */
+public final class PropertyNamer {
+
+  private PropertyNamer() {
+    // Prevent Instantiation of Static Class
+  }
 
   public static String methodToProperty(String name) {
     if (name.startsWith("is")) {
@@ -38,15 +45,15 @@ public class PropertyNamer {
   }
 
   public static boolean isProperty(String name) {
-    return name.startsWith("get") || name.startsWith("set") || name.startsWith("is");
+    return isGetter(name) || isSetter(name);
   }
 
   public static boolean isGetter(String name) {
-    return name.startsWith("get") || name.startsWith("is");
+    return (name.startsWith("get") && name.length() > 3) || (name.startsWith("is") && name.length() > 2);
   }
 
   public static boolean isSetter(String name) {
-    return name.startsWith("set");
+    return name.startsWith("set") && name.length() > 3;
   }
 
 }

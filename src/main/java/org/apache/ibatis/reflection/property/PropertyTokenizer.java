@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@ package org.apache.ibatis.reflection.property;
 
 import java.util.Iterator;
 
-public class PropertyTokenizer implements Iterable<PropertyTokenizer>, Iterator<PropertyTokenizer> {
+/**
+ * @author Clinton Begin
+ */
+public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
   private String name;
-  private String indexedName;
+  private final String indexedName;
   private String index;
-  private String children;
+  private final String children;
 
   public PropertyTokenizer(String fullname) {
     int delim = fullname.indexOf('.');
@@ -56,19 +59,18 @@ public class PropertyTokenizer implements Iterable<PropertyTokenizer>, Iterator<
     return children;
   }
 
+  @Override
   public boolean hasNext() {
     return children != null;
   }
 
+  @Override
   public PropertyTokenizer next() {
     return new PropertyTokenizer(children);
   }
 
+  @Override
   public void remove() {
     throw new UnsupportedOperationException("Remove is not supported, as it has no meaning in the context of properties.");
-  }
-
-  public Iterator<PropertyTokenizer> iterator() {
-    return this;
   }
 }

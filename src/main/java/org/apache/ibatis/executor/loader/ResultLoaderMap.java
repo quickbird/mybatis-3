@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BaseExecutor;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.executor.ExecutorException;
@@ -40,22 +41,26 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * @author Clinton Begin
+ * @author Franta Mejta
+ */
 public class ResultLoaderMap {
 
-  private final Map<String, LoadPair> loaderMap = new HashMap<String, LoadPair>();
+  private final Map<String, LoadPair> loaderMap = new HashMap<>();
 
   public void addLoader(String property, MetaObject metaResultObject, ResultLoader resultLoader) {
     String upperFirst = getUppercaseFirstProperty(property);
     if (!upperFirst.equalsIgnoreCase(property) && loaderMap.containsKey(upperFirst)) {
-      throw new ExecutorException("Nested lazy loaded result property '" + property +
-              "' for query id '" + resultLoader.mappedStatement.getId() +
-              " already exists in the result map. The leftmost property of all lazy loaded properties must be unique within a result map.");
+      throw new ExecutorException("Nested lazy loaded result property '" + property
+              + "' for query id '" + resultLoader.mappedStatement.getId()
+              + " already exists in the result map. The leftmost property of all lazy loaded properties must be unique within a result map.");
     }
     loaderMap.put(upperFirst, new LoadPair(property, metaResultObject, resultLoader));
   }
 
   public final Map<String, LoadPair> getProperties() {
-    return new HashMap<String, LoadPair>(this.loaderMap);
+    return new HashMap<>(this.loaderMap);
   }
 
   public Set<String> getPropertyNames() {
@@ -77,6 +82,10 @@ public class ResultLoaderMap {
       return true;
     }
     return false;
+  }
+
+  public void remove(String property) {
+    loaderMap.remove(property.toUpperCase(Locale.ENGLISH));
   }
 
   public void loadAll() throws SQLException {
@@ -105,7 +114,7 @@ public class ResultLoaderMap {
     /**
      * Object to check whether we went through serialization..
      */
-    private transient final Object serializationCheck = new Object();
+    private final transient Object serializationCheck = new Object();
     /**
      * Meta object which sets loaded properties.
      */
@@ -151,10 +160,13 @@ public class ResultLoaderMap {
 
           this.configurationFactory = resultLoader.configuration.getConfigurationFactory();
         } else {
-          this.getLogger().debug("Property [" + this.property + "] of ["
-                  + metaResultObject.getOriginalObject().getClass() + "] cannot be loaded "
-                  + "after deserialization. Make sure it's loaded before serializing "
-                  + "forenamed object.");
+          Log log = this.getLogger();
+          if (log.isDebugEnabled()) {
+            log.debug("Property [" + this.property + "] of ["
+                    + metaResultObject.getOriginalObject().getClass() + "] cannot be loaded "
+                    + "after deserialization. Make sure it's loaded before serializing "
+                    + "forenamed object.");
+          }
         }
       }
     }
@@ -162,8 +174,12 @@ public class ResultLoaderMap {
     public void load() throws SQLException {
       /* These field should not be null unless the loadpair was serialized.
        * Yet in that case this method should not be called. */
-      if (this.metaResultObject == null) throw new IllegalArgumentException("metaResultObject is null");
-      if (this.resultLoader == null) throw new IllegalArgumentException("resultLoader is null");
+      if (this.metaResultObject == null) {
+        throw new IllegalArgumentException("metaResultObject is null");
+      }
+      if (this.resultLoader == null) {
+        throw new IllegalArgumentException("resultLoader is null");
+      }
 
       this.load(null);
     }
@@ -208,7 +224,7 @@ public class ResultLoaderMap {
         throw new ExecutorException("Cannot get Configuration as configuration factory was not set.");
       }
 
-      Object configurationObject = null;
+      Object configurationObject;
       try {
         final Method factoryMethod = this.configurationFactory.getDeclaredMethod(FACTORY_METHOD);
         if (!Modifier.isStatic(factoryMethod.getModifiers())) {
@@ -218,20 +234,19 @@ public class ResultLoaderMap {
         }
 
         if (!factoryMethod.isAccessible()) {
-          configurationObject = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-            @Override
-            public Object run() throws Exception {
-              try {
-                factoryMethod.setAccessible(true);
-                return factoryMethod.invoke(null);
-              } finally {
-                factoryMethod.setAccessible(false);
-              }
+          configurationObject = AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () -> {
+            try {
+              factoryMethod.setAccessible(true);
+              return factoryMethod.invoke(null);
+            } finally {
+              factoryMethod.setAccessible(false);
             }
           });
         } else {
           configurationObject = factoryMethod.invoke(null);
         }
+      } catch (final ExecutorException ex) {
+        throw ex;
       } catch (final NoSuchMethodException ex) {
         throw new ExecutorException("Cannot get Configuration as factory class ["
                 + this.configurationFactory + "] is missing factory method of name ["
@@ -247,11 +262,10 @@ public class ResultLoaderMap {
       }
 
       if (!(configurationObject instanceof Configuration)) {
-        final boolean isNull = (configurationObject == null);
         throw new ExecutorException("Cannot get Configuration as factory method ["
                 + this.configurationFactory + "]#["
                 + FACTORY_METHOD + "] didn't return [" + Configuration.class + "] but ["
-                + (isNull ? "null" : configurationObject.getClass()) + "].");
+                + (configurationObject == null ? "null" : configurationObject.getClass()) + "].");
       }
 
       return Configuration.class.cast(configurationObject);
@@ -288,6 +302,11 @@ public class ResultLoaderMap {
 
     @Override
     protected <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+      throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    protected <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException {
       throw new UnsupportedOperationException("Not supported.");
     }
   }

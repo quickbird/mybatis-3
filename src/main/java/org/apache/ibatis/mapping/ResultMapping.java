@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+/**
+ * @author Clinton Begin
+ */
 public class ResultMapping {
 
   private Configuration configuration;
@@ -41,36 +44,32 @@ public class ResultMapping {
   private List<ResultMapping> composites;
   private String resultSet;
   private String foreignColumn;
+  private boolean lazy;
 
-  private ResultMapping() {
+  ResultMapping() {
   }
 
   public static class Builder {
     private ResultMapping resultMapping = new ResultMapping();
 
     public Builder(Configuration configuration, String property, String column, TypeHandler<?> typeHandler) {
-      resultMapping.configuration = configuration;
-      resultMapping.property = property;
+      this(configuration, property);
       resultMapping.column = column;
       resultMapping.typeHandler = typeHandler;
-      resultMapping.flags = new ArrayList<ResultFlag>();
-      resultMapping.composites = new ArrayList<ResultMapping>();
     }
 
     public Builder(Configuration configuration, String property, String column, Class<?> javaType) {
-      resultMapping.configuration = configuration;
-      resultMapping.property = property;
+      this(configuration, property);
       resultMapping.column = column;
       resultMapping.javaType = javaType;
-      resultMapping.flags = new ArrayList<ResultFlag>();
-      resultMapping.composites = new ArrayList<ResultMapping>();
     }
 
     public Builder(Configuration configuration, String property) {
       resultMapping.configuration = configuration;
       resultMapping.property = property;
-      resultMapping.flags = new ArrayList<ResultFlag>();
-      resultMapping.composites = new ArrayList<ResultMapping>();
+      resultMapping.flags = new ArrayList<>();
+      resultMapping.composites = new ArrayList<>();
+      resultMapping.lazy = configuration.isLazyLoadingEnabled();
     }
 
     public Builder javaType(Class<?> javaType) {
@@ -128,6 +127,11 @@ public class ResultMapping {
       return this;
     }
 
+    public Builder lazy(boolean lazy) {
+      resultMapping.lazy = lazy;
+      return this;
+    }
+
     public ResultMapping build() {
       // lock down collections
       resultMapping.flags = Collections.unmodifiableList(resultMapping.flags);
@@ -145,26 +149,26 @@ public class ResultMapping {
       // Issue #5: there should be no mappings without typehandler
       if (resultMapping.nestedQueryId == null && resultMapping.nestedResultMapId == null && resultMapping.typeHandler == null) {
         throw new IllegalStateException("No typehandler found for property " + resultMapping.property);
-      }    
-      // Issue #4: column is mandatory on nested queries
-      if (resultMapping.nestedQueryId != null && resultMapping.column == null && resultMapping.composites.size() == 0) {
-        throw new IllegalStateException("Missing column attribute for nested select in property " + resultMapping.property);
+      }
+      // Issue #4 and GH #39: column is optional only in nested resultmaps but not in the rest
+      if (resultMapping.nestedResultMapId == null && resultMapping.column == null && resultMapping.composites.isEmpty()) {
+        throw new IllegalStateException("Mapping is missing column attribute for property " + resultMapping.property);
       }
       if (resultMapping.getResultSet() != null) {
-        int numColums = 0;
+        int numColumns = 0;
         if (resultMapping.column != null) {
-          numColums = resultMapping.column.split(",").length;
+          numColumns = resultMapping.column.split(",").length;
         }
         int numForeignColumns = 0;
         if (resultMapping.foreignColumn != null) {
           numForeignColumns = resultMapping.foreignColumn.split(",").length;
         }
-        if (numColums != numForeignColumns) {
+        if (numColumns != numForeignColumns) {
           throw new IllegalStateException("There should be the same number of columns and foreignColumns in property " + resultMapping.property);
         }
       }
     }
-    
+
     private void resolveTypeHandler() {
       if (resultMapping.typeHandler == null && resultMapping.javaType != null) {
         Configuration configuration = resultMapping.configuration;
@@ -239,6 +243,18 @@ public class ResultMapping {
     this.foreignColumn = foreignColumn;
   }
 
+  public boolean isLazy() {
+    return lazy;
+  }
+
+  public void setLazy(boolean lazy) {
+    this.lazy = lazy;
+  }
+
+  public boolean isSimple() {
+    return this.nestedResultMapId == null && this.nestedQueryId == null && this.resultSet == null;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -250,11 +266,7 @@ public class ResultMapping {
 
     ResultMapping that = (ResultMapping) o;
 
-    if (property == null || !property.equals(that.property)) {
-      return false;
-    }
-
-    return true;
+    return property != null && property.equals(that.property);
   }
 
   @Override
@@ -267,4 +279,27 @@ public class ResultMapping {
       return 0;
     }
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("ResultMapping{");
+    //sb.append("configuration=").append(configuration); // configuration doesn't have a useful .toString()
+    sb.append("property='").append(property).append('\'');
+    sb.append(", column='").append(column).append('\'');
+    sb.append(", javaType=").append(javaType);
+    sb.append(", jdbcType=").append(jdbcType);
+    //sb.append(", typeHandler=").append(typeHandler); // typeHandler also doesn't have a useful .toString()
+    sb.append(", nestedResultMapId='").append(nestedResultMapId).append('\'');
+    sb.append(", nestedQueryId='").append(nestedQueryId).append('\'');
+    sb.append(", notNullColumns=").append(notNullColumns);
+    sb.append(", columnPrefix='").append(columnPrefix).append('\'');
+    sb.append(", flags=").append(flags);
+    sb.append(", composites=").append(composites);
+    sb.append(", resultSet='").append(resultSet).append('\'');
+    sb.append(", foreignColumn='").append(foreignColumn).append('\'');
+    sb.append(", lazy=").append(lazy);
+    sb.append('}');
+    return sb.toString();
+  }
+
 }

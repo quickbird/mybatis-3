@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@ package org.apache.ibatis.executor.result;
 
 import org.apache.ibatis.session.ResultContext;
 
-public class DefaultResultContext implements ResultContext {
+/**
+ * @author Clinton Begin
+ */
+public class DefaultResultContext<T> implements ResultContext<T> {
 
-  private Object resultObject;
+  private T resultObject;
   private int resultCount;
   private boolean stopped;
 
@@ -29,23 +32,27 @@ public class DefaultResultContext implements ResultContext {
     stopped = false;
   }
 
-  public Object getResultObject() {
+  @Override
+  public T getResultObject() {
     return resultObject;
   }
 
+  @Override
   public int getResultCount() {
     return resultCount;
   }
 
+  @Override
   public boolean isStopped() {
     return stopped;
   }
 
-  public void nextResultObject(Object resultObject) {
+  public void nextResultObject(T resultObject) {
     resultCount++;
     this.resultObject = resultObject;
   }
 
+  @Override
   public void stop() {
     this.stopped = true;
   }

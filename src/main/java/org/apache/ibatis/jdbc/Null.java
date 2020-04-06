@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ import org.apache.ibatis.type.StringTypeHandler;
 import org.apache.ibatis.type.TimeOnlyTypeHandler;
 import org.apache.ibatis.type.TypeHandler;
 
+/**
+ * @author Clinton Begin
+ * @author Adam Gent
+ */
 public enum Null {
   BOOLEAN(new BooleanTypeHandler(), JdbcType.BOOLEAN),
 
@@ -65,15 +69,15 @@ public enum Null {
   SQLDATE(new SqlDateTypeHandler(), JdbcType.DATE),
   SQLTIME(new SqlTimeTypeHandler(), JdbcType.TIME);
 
-  private TypeHandler typeHandler;
+  private TypeHandler<?> typeHandler;
   private JdbcType jdbcType;
 
-  private Null(TypeHandler typeHandler, JdbcType jdbcType) {
+  Null(TypeHandler<?> typeHandler, JdbcType jdbcType) {
     this.typeHandler = typeHandler;
     this.jdbcType = jdbcType;
   }
 
-  public TypeHandler getTypeHandler() {
+  public TypeHandler<?> getTypeHandler() {
     return typeHandler;
   }
 

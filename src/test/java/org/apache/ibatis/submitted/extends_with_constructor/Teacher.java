@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,25 +18,31 @@ package org.apache.ibatis.submitted.extends_with_constructor;
 import java.util.List;
 
 public class Teacher {
-	private int id;
-	private String name;
-	private List<StudentConstructor> students;
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public List<StudentConstructor> getStudents() {
-		return students;
-	}
-	public void setStudents(List<StudentConstructor> students) {
-		this.students = students;
-	}
+  private int id;
+  private String name;
+  private List<StudentConstructor> students;
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public List<StudentConstructor> getStudents() {
+    return students;
+  }
+
+  public void setStudents(List<StudentConstructor> students) {
+    this.students = students;
+  }
 }

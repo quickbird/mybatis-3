@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.apache.ibatis.session;
 
 import java.sql.Connection;
 
+/**
+ * @author Clinton Begin
+ */
 public enum TransactionIsolationLevel {
   NONE(Connection.TRANSACTION_NONE),
   READ_COMMITTED(Connection.TRANSACTION_READ_COMMITTED),
@@ -26,7 +29,7 @@ public enum TransactionIsolationLevel {
 
   private final int level;
 
-  private TransactionIsolationLevel(int level) {
+  TransactionIsolationLevel(int level) {
     this.level = level;
   }
 

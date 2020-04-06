@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.apache.ibatis.builder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.ResultSetType;
@@ -27,6 +28,9 @@ import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+/**
+ * @author Clinton Begin
+ */
 public abstract class BaseBuilder {
   protected final Configuration configuration;
   protected final TypeAliasRegistry typeAliasRegistry;
@@ -42,6 +46,10 @@ public abstract class BaseBuilder {
     return configuration;
   }
 
+  protected Pattern parseExpression(String regex, String defaultValue) {
+    return Pattern.compile(regex == null ? defaultValue : regex);
+  }
+
   protected Boolean booleanValueOf(String value, Boolean defaultValue) {
     return value == null ? defaultValue : Boolean.valueOf(value);
   }
@@ -51,12 +59,14 @@ public abstract class BaseBuilder {
   }
 
   protected Set<String> stringSetValueOf(String value, String defaultValue) {
-    value = (value == null ? defaultValue : value);
-    return new HashSet<String>(Arrays.asList(value.split(",")));
+    value = value == null ? defaultValue : value;
+    return new HashSet<>(Arrays.asList(value.split(",")));
   }
 
   protected JdbcType resolveJdbcType(String alias) {
-    if (alias == null) return null;
+    if (alias == null) {
+      return null;
+    }
     try {
       return JdbcType.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -65,7 +75,9 @@ public abstract class BaseBuilder {
   }
 
   protected ResultSetType resolveResultSetType(String alias) {
-    if (alias == null) return null;
+    if (alias == null) {
+      return null;
+    }
     try {
       return ResultSetType.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -74,7 +86,9 @@ public abstract class BaseBuilder {
   }
 
   protected ParameterMode resolveParameterMode(String alias) {
-    if (alias == null) return null;
+    if (alias == null) {
+      return null;
+    }
     try {
       return ParameterMode.valueOf(alias);
     } catch (IllegalArgumentException e) {
@@ -84,16 +98,20 @@ public abstract class BaseBuilder {
 
   protected Object createInstance(String alias) {
     Class<?> clazz = resolveClass(alias);
-    if (clazz == null) return null;
+    if (clazz == null) {
+      return null;
+    }
     try {
-      return resolveClass(alias).newInstance();
+      return clazz.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
       throw new BuilderException("Error creating instance. Cause: " + e, e);
     }
   }
 
-  protected Class<?> resolveClass(String alias) {
-    if (alias == null) return null;
+  protected <T> Class<? extends T> resolveClass(String alias) {
+    if (alias == null) {
+      return null;
+    }
     try {
       return resolveAlias(alias);
     } catch (Exception e) {
@@ -102,18 +120,22 @@ public abstract class BaseBuilder {
   }
 
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
-    if (typeHandlerAlias == null) return null;
+    if (typeHandlerAlias == null) {
+      return null;
+    }
     Class<?> type = resolveClass(typeHandlerAlias);
     if (type != null && !TypeHandler.class.isAssignableFrom(type)) {
       throw new BuilderException("Type " + type.getName() + " is not a valid TypeHandler because it does not implement TypeHandler interface");
     }
-    @SuppressWarnings( "unchecked" ) // already verified it is a TypeHandler
+    @SuppressWarnings("unchecked") // already verified it is a TypeHandler
     Class<? extends TypeHandler<?>> typeHandlerType = (Class<? extends TypeHandler<?>>) type;
     return resolveTypeHandler(javaType, typeHandlerType);
   }
 
   protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
-    if (typeHandlerType == null) return null;
+    if (typeHandlerType == null) {
+      return null;
+    }
     // javaType ignored for injected handlers see issue #746 for full detail
     TypeHandler<?> handler = typeHandlerRegistry.getMappingTypeHandler(typeHandlerType);
     if (handler == null) {
@@ -123,7 +145,7 @@ public abstract class BaseBuilder {
     return handler;
   }
 
-  protected Class<?> resolveAlias(String alias) {
+  protected <T> Class<? extends T> resolveAlias(String alias) {
     return typeAliasRegistry.resolveAlias(alias);
   }
 }

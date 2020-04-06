@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,28 +15,32 @@
  */
 package org.apache.ibatis.submitted.dynsql2;
 
+import java.sql.*;
+
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
-import java.sql.*;
-
 public class LastNameTypeHandler implements TypeHandler {
 
+  @Override
   public Object getResult(CallableStatement cs, int columnIndex)
       throws SQLException {
     return cs.getString(columnIndex);
   }
 
+  @Override
   public Object getResult(ResultSet rs, String columnName)
       throws SQLException {
     return rs.getString(columnName);
   }
 
+  @Override
   public Object getResult(ResultSet rs, int columnIndex)
       throws SQLException {
     return rs.getString(columnIndex);
   }
 
+  @Override
   public void setParameter(PreparedStatement ps, int i, Object parameter,
                            JdbcType jdbcType) throws SQLException {
     if (parameter == null) {

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2011 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,19 +20,22 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
 
 /**
  * The primary Java interface for working with MyBatis.
  * Through this interface you can execute commands, get mappers and manage transactions.
  *
+ * @author Clinton Begin
  */
 public interface SqlSession extends Closeable {
 
   /**
-   * Retrieve a single row mapped from the statement key
+   * Retrieve a single row mapped from the statement key.
    * @param <T> the returned object type
    * @param statement
+   *          the statement
    * @return Mapped object
    */
   <T> T selectOne(String statement);
@@ -115,12 +118,38 @@ public interface SqlSession extends Closeable {
   <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds);
 
   /**
+   * A Cursor offers the same results as a List, except it fetches data lazily using an Iterator.
+   * @param <T> the returned cursor element type.
+   * @param statement Unique identifier matching the statement to use.
+   * @return Cursor of mapped objects
+   */
+  <T> Cursor<T> selectCursor(String statement);
+
+  /**
+   * A Cursor offers the same results as a List, except it fetches data lazily using an Iterator.
+   * @param <T> the returned cursor element type.
+   * @param statement Unique identifier matching the statement to use.
+   * @param parameter A parameter object to pass to the statement.
+   * @return Cursor of mapped objects
+   */
+  <T> Cursor<T> selectCursor(String statement, Object parameter);
+
+  /**
+   * A Cursor offers the same results as a List, except it fetches data lazily using an Iterator.
+   * @param <T> the returned cursor element type.
+   * @param statement Unique identifier matching the statement to use.
+   * @param parameter A parameter object to pass to the statement.
+   * @param rowBounds  Bounds to limit object retrieval
+   * @return Cursor of mapped objects
+   */
+  <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds);
+
+  /**
    * Retrieve a single row mapped from the statement key and parameter
    * using a {@code ResultHandler}.
    * @param statement Unique identifier matching the statement to use.
    * @param parameter A parameter object to pass to the statement.
    * @param handler ResultHandler that will handle each retrieved row
-   * @return Mapped object
    */
   void select(String statement, Object parameter, ResultHandler handler);
 
@@ -129,17 +158,21 @@ public interface SqlSession extends Closeable {
    * using a {@code ResultHandler}.
    * @param statement Unique identifier matching the statement to use.
    * @param handler ResultHandler that will handle each retrieved row
-   * @return Mapped object
    */
   void select(String statement, ResultHandler handler);
 
   /**
-   * Retrieve a single row mapped from the statement key and parameter
-   * using a {@code ResultHandler} and {@code RowBounds}
-   * @param statement Unique identifier matching the statement to use.
-   * @param rowBounds RowBound instance to limit the query results
-   * @param handler ResultHandler that will handle each retrieved row
-   * @return Mapped object
+   * Retrieve a single row mapped from the statement key and parameter using a {@code ResultHandler} and
+   * {@code RowBounds}.
+   *
+   * @param statement
+   *          Unique identifier matching the statement to use.
+   * @param parameter
+   *          the parameter
+   * @param rowBounds
+   *          RowBound instance to limit the query results
+   * @param handler
+   *          ResultHandler that will handle each retrieved row
    */
   void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
 
@@ -225,17 +258,18 @@ public interface SqlSession extends Closeable {
   List<BatchResult> flushStatements();
 
   /**
-   * Closes the session
+   * Closes the session.
    */
+  @Override
   void close();
 
   /**
-   * Clears local session cache
+   * Clears local session cache.
    */
   void clearCache();
 
   /**
-   * Retrieves current configuration
+   * Retrieves current configuration.
    * @return Configuration
    */
   Configuration getConfiguration();
@@ -249,7 +283,7 @@ public interface SqlSession extends Closeable {
   <T> T getMapper(Class<T> type);
 
   /**
-   * Retrieves inner database connection
+   * Retrieves inner database connection.
    * @return Connection
    */
   Connection getConnection();

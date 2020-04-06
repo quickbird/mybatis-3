@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 package org.apache.ibatis.executor;
 
 import org.apache.ibatis.transaction.Transaction;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class BatchExecutorTest extends BaseExecutorTest {
+class BatchExecutorTest extends BaseExecutorTest {
 
   @Test
-  public void dummy() {
+  void dummy() {
   }
 
+  @Override
   protected Executor createExecutor(Transaction transaction) {
-    return new BatchExecutor(config,transaction);
+    return new BatchExecutor(config, transaction);
   }
 }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.apache.ibatis.io;
 import java.io.InputStream;
 import java.net.URL;
 
-/*
+/**
  * A class to wrap access to multiple class loaders making them work as one
+ *
+ * @author Clinton Begin
  */
 public class ClassLoaderWrapper {
 
@@ -30,11 +32,11 @@ public class ClassLoaderWrapper {
     try {
       systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (SecurityException ignored) {
-      // AccessControlException on Google App Engine   
+      // AccessControlException on Google App Engine
     }
   }
-  
-  /*
+
+  /**
    * Get a resource as a URL using the current class path
    *
    * @param resource - the resource to locate
@@ -44,7 +46,7 @@ public class ClassLoaderWrapper {
     return getResourceAsURL(resource, getClassLoaders(null));
   }
 
-  /*
+  /**
    * Get a resource from the classpath, starting with a specific class loader
    *
    * @param resource    - the resource to find
@@ -55,7 +57,7 @@ public class ClassLoaderWrapper {
     return getResourceAsURL(resource, getClassLoaders(classLoader));
   }
 
-  /*
+  /**
    * Get a resource from the classpath
    *
    * @param resource - the resource to find
@@ -65,7 +67,7 @@ public class ClassLoaderWrapper {
     return getResourceAsStream(resource, getClassLoaders(null));
   }
 
-  /*
+  /**
    * Get a resource from the classpath, starting with a specific class loader
    *
    * @param resource    - the resource to find
@@ -76,7 +78,7 @@ public class ClassLoaderWrapper {
     return getResourceAsStream(resource, getClassLoaders(classLoader));
   }
 
-  /*
+  /**
    * Find a class on the classpath (or die trying)
    *
    * @param name - the class to look for
@@ -87,7 +89,7 @@ public class ClassLoaderWrapper {
     return classForName(name, getClassLoaders(null));
   }
 
-  /*
+  /**
    * Find a class on the classpath, starting with a specific classloader (or die trying)
    *
    * @param name        - the class to look for
@@ -99,7 +101,7 @@ public class ClassLoaderWrapper {
     return classForName(name, getClassLoaders(classLoader));
   }
 
-  /*
+  /**
    * Try to get a resource from a group of classloaders
    *
    * @param resource    - the resource to get
@@ -114,15 +116,19 @@ public class ClassLoaderWrapper {
         InputStream returnValue = cl.getResourceAsStream(resource);
 
         // now, some class loaders want this leading "/", so we'll add it and try again if we didn't find the resource
-        if (null == returnValue) returnValue = cl.getResourceAsStream("/" + resource);
+        if (null == returnValue) {
+          returnValue = cl.getResourceAsStream("/" + resource);
+        }
 
-        if (null != returnValue) return returnValue;
+        if (null != returnValue) {
+          return returnValue;
+        }
       }
     }
     return null;
   }
 
-  /*
+  /**
    * Get a resource as a URL using the current class path
    *
    * @param resource    - the resource to locate
@@ -142,11 +148,15 @@ public class ClassLoaderWrapper {
 
         // ...but some class loaders want this leading "/", so we'll add it
         // and try again if we didn't find the resource
-        if (null == url) url = cl.getResource("/" + resource);
+        if (null == url) {
+          url = cl.getResource("/" + resource);
+        }
 
         // "It's always in the last place I look for it!"
         // ... because only an idiot would keep looking for it after finding it, so stop looking already.
-        if (null != url) return url;
+        if (null != url) {
+          return url;
+        }
 
       }
 
@@ -157,7 +167,7 @@ public class ClassLoaderWrapper {
 
   }
 
-  /*
+  /**
    * Attempt to load a class from a group of classloaders
    *
    * @param name        - the class to load
@@ -175,7 +185,9 @@ public class ClassLoaderWrapper {
 
           Class<?> c = Class.forName(name, true, cl);
 
-          if (null != c) return c;
+          if (null != c) {
+            return c;
+          }
 
         } catch (ClassNotFoundException e) {
           // we'll ignore this until all classloaders fail to locate the class
@@ -191,11 +203,11 @@ public class ClassLoaderWrapper {
 
   ClassLoader[] getClassLoaders(ClassLoader classLoader) {
     return new ClassLoader[]{
-        classLoader, 
-        defaultClassLoader, 
-        Thread.currentThread().getContextClassLoader(), 
-        getClass().getClassLoader(), 
-        systemClassLoader}; 
+        classLoader,
+        defaultClassLoader,
+        Thread.currentThread().getContextClassLoader(),
+        getClass().getClassLoader(),
+        systemClassLoader};
   }
 
 }

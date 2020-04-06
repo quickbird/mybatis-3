@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright 2010-2012 The MyBatis Team
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+       Copyright 2009-2019 the original author or authors.
 
-    http://www.apache.org/licenses/LICENSE-2.0
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
 -->
-
-<!-- version: $Id$ -->
-
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
   <properties>
     <title>MyBatis 3 | Dynamic SQL</title>
-    <author email="mybatis-dev@googlegroups.com">The MyBatis Team</author>
+    <author email="clinton.begin@gmail.com">Clinton Begin</author>
   </properties>
 
   <body>
@@ -39,7 +38,7 @@
   <subsection name="if" id="if">
   <p>The most common thing to do in dynamic SQL is conditionally include a part of a where clause. For example:</p>
   <source><![CDATA[<select id="findActiveBlogWithTitleLike"
-     parameterType="Blog" resultType="Blog">
+     resultType="Blog">
   SELECT * FROM BLOG
   WHERE state = ‘ACTIVE’
   <if test="title != null">
@@ -49,7 +48,7 @@
   <p>This statement would provide an optional text search type of functionality. If you passed in no title, then all active Blogs would be returned. But if you do pass in a title, it will look for a title like that (for the keen eyed, yes in this case your parameter value would need to include any masking or wildcard characters).</p>
   <p>What if we wanted to optionally search by title and author?  First, I’d change the name of the statement to make more sense. Then simply add another condition.</p>
   <source><![CDATA[<select id="findActiveBlogLike"
-     parameterType="Blog" resultType="Blog">
+     resultType="Blog">
   SELECT * FROM BLOG WHERE state = ‘ACTIVE’
   <if test="title != null">
     AND title like #{title}
@@ -63,7 +62,7 @@
   <p>Sometimes we don’t want all of the conditionals to apply, instead we want to choose only one case among many options. Similar to a switch statement in Java, MyBatis offers a choose element.</p>
   <p>Let’s use the example above, but now let’s search only on title if one is provided, then only by author if one is provided. If neither is provided, let’s only return featured blogs (perhaps a strategically list selected by administrators, instead of returning  a huge meaningless list of random blogs).</p>
   <source><![CDATA[<select id="findActiveBlogLike"
-     parameterType="Blog" resultType="Blog">
+     resultType="Blog">
   SELECT * FROM BLOG WHERE state = ‘ACTIVE’
   <choose>
     <when test="title != null">
@@ -81,7 +80,7 @@
   <subsection name="trim, where, set" id="trimWhereSet">
   <p>The previous examples have been conveniently dancing around a notorious dynamic SQL challenge. Consider what would happen if we return to our "if" example, but this time we make "ACTIVE = 1" a dynamic condition as well.</p>
   <source><![CDATA[<select id="findActiveBlogLike"
-     parameterType="Blog" resultType="Blog">
+     resultType="Blog">
   SELECT * FROM BLOG
   WHERE
   <if test="state != null">
@@ -104,7 +103,7 @@ AND title like ‘someTitle’]]></source>
   <p>This would also fail. This problem is not easily solved with conditionals, and if you’ve ever had to write it, then you likely never want to do so again.</p>
   <p>MyBatis has a simple answer that will likely work in 90% of the cases. And in cases where it doesn’t, you can customize it so that it does. With one simple change, everything works fine:</p>
   <source><![CDATA[<select id="findActiveBlogLike"
-     parameterType="Blog" resultType="Blog">
+     resultType="Blog">
   SELECT * FROM BLOG
   <where>
     <if test="state != null">
@@ -125,8 +124,7 @@ AND title like ‘someTitle’]]></source>
 </trim>]]></source>
   <p>The <em>prefixOverrides</em> attribute takes a pipe delimited list of text to override, where whitespace <u>is</u> relevant. The result is the removal of anything specified in the <em>prefixOverrides</em> attribute, and the insertion of anything in the <em>prefix</em> attribute.</p>
   <p>There is a similar solution for dynamic update statements called <em>set</em>. The <em>set</em> element can be used to dynamically include columns to update, and leave out others. For example:</p>
-  <source><![CDATA[<update id="updateAuthorIfNecessary"
-       parameterType="domain.blog.Author">
+  <source><![CDATA[<update id="updateAuthorIfNecessary">
   update Author
     <set>
       <if test="username != null">username=#{username},</if>
@@ -155,13 +153,28 @@ AND title like ‘someTitle’]]></source>
   </foreach>
 </select>]]></source>
   <p>The <em>foreach</em> element is very powerful, and allows you to specify a collection, declare item and index variables that can be used inside the body of the element. It also allows you to specify opening and closing strings, and add a separator to place in between iterations. The element is smart in that it won’t accidentally append extra separators. </p>
-  <p><span class="label important">NOTE</span> You can pass a List instance or an Array to MyBatis as a parameter object. When you do, MyBatis will automatically wrap it in a Map, and key it by name. List instances will be keyed to the name "list" and array instances will be keyed to the name "array".</p>
+  <p><span class="label important">NOTE</span> You can pass any Iterable object (for example List, Set, etc.), as well as any Map or Array object to foreach as collection parameter. When using an Iterable or Array, index will be the number of current iteration and value item will be the element retrieved in this iteration. When using a Map (or Collection of Map.Entry objects), index will be the key object and item will be the value object.</p>
   <p>This wraps up the discussion regarding the XML configuration file and XML mapping files. The next section will discuss the Java API in detail, so that you can get the most out of the mappings that you’ve created.</p>
+  </subsection>
+  <subsection name="script">
+  <p>For using dynamic SQL in annotated mapper class, <em>script</em> element can be used. For example:</p>
+  <source><![CDATA[
+    @Update({"<script>",
+      "update Author",
+      "  <set>",
+      "    <if test='username != null'>username=#{username},</if>",
+      "    <if test='password != null'>password=#{password},</if>",
+      "    <if test='email != null'>email=#{email},</if>",
+      "    <if test='bio != null'>bio=#{bio}</if>",
+      "  </set>",
+      "where id=#{id}",
+      "</script>"})
+    void updateAuthorValues(Author author);]]></source>
   </subsection>
   <subsection name="bind">
   <p>The <code>bind</code> element lets you create a variable out of an OGNL expression and bind it to the context. For example:</p>
   <source><![CDATA[
-<select id="selectBlogsLike" parameterType="Blog" resultType="Blog">
+<select id="selectBlogsLike" resultType="Blog">
   <bind name="pattern" value="'%' + _parameter.getTitle() + '%'" />
   SELECT * FROM BLOG
   WHERE title LIKE #{pattern}
@@ -169,7 +182,7 @@ AND title like ‘someTitle’]]></source>
   </subsection>
   <subsection name="Multi-db vendor support">
   <p>If a databaseIdProvider was configured a "_databaseId" variable is available for dynamic code, so you can build different statements depending on database vendor. Have a look at the following example:</p>
-  <source><![CDATA[<insert id="insert" parameterType="org.myapp.domain.User">
+  <source><![CDATA[<insert id="insert">
   <selectKey keyProperty="id" resultType="int" order="BEFORE">
     <if test="_databaseId == 'oracle'">
       select seq_users.nextval from dual
@@ -186,34 +199,37 @@ AND title like ‘someTitle’]]></source>
     <p>Starting from version 3.2 MyBatis supports pluggable scripting languages,
     so you can plug a language driver and use that language to write your dynamic
     SQL queries.</p>
-    <p>There are two built-in languages:</p>
-    <ul>
-    <li>xml</li>
-    <li>raw</li>
-    </ul>
-    <p>The <code>xml</code> language is the default one. It is able to execute all the dynamic tags we saw in the previous sections.</p>
-    <p>The <code>raw</code> language is in fact the absence of language. When using this setting MyBatis just performs the 
-    parameter substitution and passes the statement to the database driver. As you may guess, the <code>raw</code> language 
-    is faster than the <code>xml</code> language.
-    </p>
-    <p>You can specify the language you want to use in an statement adding the <code>lang</code> attribute as follows:
-    </p>
-  <source><![CDATA[<select id="selectBlog" lang="raw">
-  SELECT * FROM BLOG
-</select>]]></source>
-    <p>Or, in the case you are using mappers, using the <code>@Lang</code> annotation:</p>
-  <source><![CDATA[public interface Mapper {
-  @Lang(RawLanguageDriver.class)
-  @Select("SELECT * FROM BLOG")
-  List<Blog> selectBlog();
-}]]></source>
-    <p>You can also implement your own language driver by implementing the following interface:</p>
+    <p>You can plug a language by implementing the following interface:</p>
   <source><![CDATA[public interface LanguageDriver {
   ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql);
   SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType);
   SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType);
-}]]></source>    
-	</subsection>
+}]]></source>
+    <p>Once you have your custom language driver you can set it to be the default by configuring it in the mybatis-config.xml file:</p>
+  <source><![CDATA[<typeAliases>
+  <typeAlias type="org.sample.MyLanguageDriver" alias="myLanguage"/>
+</typeAliases>
+<settings>
+  <setting name="defaultScriptingLanguage" value="myLanguage"/>
+</settings>
+]]></source>
+    <p>Instead of changing the default, you can specify the language for an specific statement by adding the <code>lang</code> attribute as follows:
+    </p>
+  <source><![CDATA[<select id="selectBlog" lang="myLanguage">
+  SELECT * FROM BLOG
+</select>]]></source>
+    <p>Or, in the case you are using mappers, using the <code>@Lang</code> annotation:</p>
+  <source><![CDATA[public interface Mapper {
+  @Lang(MyLanguageDriver.class)
+  @Select("SELECT * FROM BLOG")
+  List<Blog> selectBlog();
+}]]></source>
+
+    <p><span class="label important">NOTE</span> You can use Apache Velocity as your dynamic language. Have a look at the MyBatis-Velocity project for the details.</p>
+
+    <p>All the xml tags you have seen in the previous sections are provided by the default MyBatis language that is provided by the driver
+    <code>org.apache.ibatis.scripting.xmltags.XmlLanguageDriver</code> which is aliased as <code>xml</code>.</p>
+  </subsection>
   </section>
   </body>
 </document>

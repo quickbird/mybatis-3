@@ -2,18 +2,17 @@
 /*.ipr
 /*.iws
 /.classpath
+/.factorypath
 /.idea
 /.project
 /.settings
-/derby.log
-/ibderby
 /nb*
 /release.properties
 /target
-/test.db.lck
-/test.db.log
-/test.db.properties
-/test.db.script
-/test.db.tmp
-/src/docbkx
-velocity.log
+
+# These are needed if running in IDE without properties set
+/ibderby
+derby.log
+/bin/
+.mvn/wrapper/maven-wrapper.jar
+.sts4-cache/

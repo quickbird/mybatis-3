@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.spi.LocationAwareLogger;
 
+/**
+ * @author Clinton Begin
+ * @author Eduardo Macarron
+ */
 public class Slf4jImpl implements Log {
 
   private Log log;
@@ -34,9 +38,7 @@ public class Slf4jImpl implements Log {
         logger.getClass().getMethod("log", Marker.class, String.class, int.class, String.class, Object[].class, Throwable.class);
         log = new Slf4jLocationAwareLoggerImpl((LocationAwareLogger) logger);
         return;
-      } catch (SecurityException e) {
-        // fail-back to Slf4jLoggerImpl
-      } catch (NoSuchMethodException e) {
+      } catch (SecurityException | NoSuchMethodException e) {
         // fail-back to Slf4jLoggerImpl
       }
     }
@@ -45,30 +47,37 @@ public class Slf4jImpl implements Log {
     log = new Slf4jLoggerImpl(logger);
   }
 
+  @Override
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
 
+  @Override
   public boolean isTraceEnabled() {
     return log.isTraceEnabled();
   }
 
+  @Override
   public void error(String s, Throwable e) {
     log.error(s, e);
   }
 
+  @Override
   public void error(String s) {
     log.error(s);
   }
 
+  @Override
   public void debug(String s) {
     log.debug(s);
   }
 
+  @Override
   public void trace(String s) {
     log.trace(s);
   }
 
+  @Override
   public void warn(String s) {
     log.warn(s);
   }

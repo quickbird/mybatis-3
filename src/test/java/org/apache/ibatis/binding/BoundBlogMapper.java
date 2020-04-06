@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,15 +15,18 @@
  */
 package org.apache.ibatis.binding;
 
-import domain.blog.Author;
-import domain.blog.Blog;
-import domain.blog.DraftPost;
-import domain.blog.Post;
-import org.apache.ibatis.annotations.*;
-import org.apache.ibatis.session.RowBounds;
-
 import java.util.List;
 import java.util.Map;
+
+import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.domain.blog.Author;
+import org.apache.ibatis.domain.blog.Blog;
+import org.apache.ibatis.domain.blog.DraftPost;
+import org.apache.ibatis.domain.blog.Post;
+import org.apache.ibatis.mapping.FetchType;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
 @CacheNamespace(readWrite = false)
 public interface BoundBlogMapper {
@@ -42,6 +45,10 @@ public interface BoundBlogMapper {
   @MapKey("id")
   Map<Integer,Blog> selectBlogsAsMapById();
 
+  @Select({ "SELECT * FROM blog ORDER BY id"})
+  @MapKey("id")
+  Map<Integer,Blog> selectRangeBlogsAsMapById(RowBounds rowBounds);
+
   //======================================================
 
   @Select({
@@ -49,6 +56,22 @@ public interface BoundBlogMapper {
       "FROM blog"
   })
   List<Blog> selectBlogs();
+
+  @Select({
+          "SELECT *",
+          "FROM blog",
+          "ORDER BY id"
+  })
+  @ResultType(Blog.class)
+  void collectRangeBlogs(ResultHandler<Object> blog, RowBounds rowBounds);
+
+
+  @Select({
+          "SELECT *",
+          "FROM blog",
+          "ORDER BY id"
+  })
+  Cursor<Blog> openRangeBlogs(RowBounds rowBounds);
 
   //======================================================
 
@@ -111,8 +134,10 @@ public interface BoundBlogMapper {
 
   Blog selectBlogUsingConstructorWithResultMap(int i);
 
+  Blog selectBlogUsingConstructorWithResultMapAndProperties(int i);
+
   Blog selectBlogUsingConstructorWithResultMapCollection(int i);
-  
+
   Blog selectBlogByIdUsingConstructor(int id);
 
   //======================================================
@@ -134,6 +159,12 @@ public interface BoundBlogMapper {
   List<Post> selectPostsLikeSubjectAndBody(RowBounds bounds,
                              @Param("subjectQuery") String subjectQuery,
                              @Param("bodyQuery") String bodyQuery);
+
+  //======================================================
+
+  @Select("SELECT * FROM " +
+    "post WHERE id = #{id}")
+  List<Post> selectPostsById(int id);
 
   //======================================================
 
@@ -164,5 +195,26 @@ public interface BoundBlogMapper {
       "WHERE ${column} = #{id} AND title = #{value}")
   Blog selectBlogWithAParamNamedValue(@Param("column") String column, @Param("id") int id, @Param("value") String title);
 
-  
+  //======================================================
+
+  @Select({
+      "SELECT *",
+      "FROM blog"
+  })
+  @Results({
+      @Result(property = "author", column = "author_id", one = @One(select = "org.apache.ibatis.binding.BoundAuthorMapper.selectAuthor")),
+      @Result(property = "posts", column = "id", many = @Many(select = "selectPostsById"))
+  })
+  List<Blog> selectBlogsWithAutorAndPosts();
+
+  @Select({
+      "SELECT *",
+      "FROM blog"
+  })
+  @Results({
+      @Result(property = "author", column = "author_id", one = @One(select = "org.apache.ibatis.binding.BoundAuthorMapper.selectAuthor", fetchType=FetchType.EAGER)),
+      @Result(property = "posts", column = "id", many = @Many(select = "selectPostsById", fetchType=FetchType.EAGER))
+  })
+  List<Blog> selectBlogsWithAutorAndPostsEagerly();
+
 }

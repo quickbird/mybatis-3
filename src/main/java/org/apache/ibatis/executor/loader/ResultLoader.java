@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionFactory;
 
+/**
+ * @author Clinton Begin
+ */
 public class ResultLoader {
 
   protected final Configuration configuration;
@@ -45,10 +48,11 @@ public class ResultLoader {
   protected final CacheKey cacheKey;
   protected final BoundSql boundSql;
   protected final ResultExtractor resultExtractor;
-  
+  protected final long creatorThreadId;
+
   protected boolean loaded;
   protected Object resultObject;
-  
+
   public ResultLoader(Configuration config, Executor executor, MappedStatement mappedStatement, Object parameterObject, Class<?> targetType, CacheKey cacheKey, BoundSql boundSql) {
     this.configuration = config;
     this.executor = executor;
@@ -59,6 +63,7 @@ public class ResultLoader {
     this.cacheKey = cacheKey;
     this.boundSql = boundSql;
     this.resultExtractor = new ResultExtractor(configuration, objectFactory);
+    this.creatorThreadId = Thread.currentThread().getId();
   }
 
   public Object loadResult() throws SQLException {
@@ -69,11 +74,11 @@ public class ResultLoader {
 
   private <E> List<E> selectList() throws SQLException {
     Executor localExecutor = executor;
-    if (localExecutor.isClosed()) {
+    if (Thread.currentThread().getId() != this.creatorThreadId || localExecutor.isClosed()) {
       localExecutor = newExecutor();
     }
     try {
-      return localExecutor.<E> query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER, cacheKey, boundSql);
+      return localExecutor.query(mappedStatement, parameterObject, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER, cacheKey, boundSql);
     } finally {
       if (localExecutor != executor) {
         localExecutor.close(false);
@@ -81,11 +86,15 @@ public class ResultLoader {
     }
   }
 
-  private Executor newExecutor() throws SQLException {
+  private Executor newExecutor() {
     final Environment environment = configuration.getEnvironment();
-    if (environment == null) throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
+    if (environment == null) {
+      throw new ExecutorException("ResultLoader could not load lazily.  Environment was not configured.");
+    }
     final DataSource ds = environment.getDataSource();
-    if (ds == null) throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
+    if (ds == null) {
+      throw new ExecutorException("ResultLoader could not load lazily.  DataSource was not configured.");
+    }
     final TransactionFactory transactionFactory = environment.getTransactionFactory();
     final Transaction tx = transactionFactory.newTransaction(ds, null, false);
     return configuration.newExecutor(tx, ExecutorType.SIMPLE);

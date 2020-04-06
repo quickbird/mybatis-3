@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,38 +18,48 @@ package org.apache.ibatis.logging.slf4j;
 import org.apache.ibatis.logging.Log;
 import org.slf4j.Logger;
 
+/**
+ * @author Eduardo Macarron
+ */
 class Slf4jLoggerImpl implements Log {
 
-  private Logger log;
+  private final Logger log;
 
   public Slf4jLoggerImpl(Logger logger) {
     log = logger;
   }
 
+  @Override
   public boolean isDebugEnabled() {
     return log.isDebugEnabled();
   }
 
+  @Override
   public boolean isTraceEnabled() {
     return log.isTraceEnabled();
   }
 
+  @Override
   public void error(String s, Throwable e) {
     log.error(s, e);
   }
 
+  @Override
   public void error(String s) {
     log.error(s);
   }
 
+  @Override
   public void debug(String s) {
     log.debug(s);
   }
 
+  @Override
   public void trace(String s) {
     log.trace(s);
   }
 
+  @Override
   public void warn(String s) {
     log.warn(s);
   }

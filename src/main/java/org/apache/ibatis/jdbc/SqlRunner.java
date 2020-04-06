@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,12 +32,15 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
+/**
+ * @author Clinton Begin
+ */
 public class SqlRunner {
 
   public static final int NO_GENERATED_KEY = Integer.MIN_VALUE + 1001;
 
-  private Connection connection;
-  private TypeHandlerRegistry typeHandlerRegistry;
+  private final Connection connection;
+  private final TypeHandlerRegistry typeHandlerRegistry;
   private boolean useGeneratedKeySupport;
 
   public SqlRunner(Connection connection) {
@@ -49,13 +52,13 @@ public class SqlRunner {
     this.useGeneratedKeySupport = useGeneratedKeySupport;
   }
 
-  /*
+  /**
    * Executes a SELECT statement that returns one row.
    *
    * @param sql  The SQL
    * @param args The arguments to be set on the statement.
-   * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
-   * @throws SQLException If more than one row is returned
+   * @return The row expected.
+   * @throws SQLException If less or more than one row is returned
    */
   public Map<String, Object> selectOne(String sql, Object... args) throws SQLException {
     List<Map<String, Object>> results = selectAll(sql, args);
@@ -65,13 +68,13 @@ public class SqlRunner {
     return results.get(0);
   }
 
-  /*
+  /**
    * Executes a SELECT statement that returns multiple rows.
    *
    * @param sql  The SQL
    * @param args The arguments to be set on the statement.
-   * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
-   * @throws SQLException If statement prepration or execution fails
+   * @return The list of rows expected.
+   * @throws SQLException If statement preparation or execution fails
    */
   public List<Map<String, Object>> selectAll(String sql, Object... args) throws SQLException {
     PreparedStatement ps = connection.prepareStatement(sql);
@@ -88,13 +91,13 @@ public class SqlRunner {
     }
   }
 
-  /*
+  /**
    * Executes an INSERT statement.
    *
    * @param sql  The SQL
    * @param args The arguments to be set on the statement.
    * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
-   * @throws SQLException If statement prepration or execution fails
+   * @throws SQLException If statement preparation or execution fails
    */
   public int insert(String sql, Object... args) throws SQLException {
     PreparedStatement ps;
@@ -118,7 +121,7 @@ public class SqlRunner {
               try {
                 return Integer.parseInt(genkey.toString());
               } catch (NumberFormatException e) {
-                //ignore, no numeric key suppot
+                //ignore, no numeric key support
               }
             }
           }
@@ -134,13 +137,13 @@ public class SqlRunner {
     }
   }
 
-  /*
+  /**
    * Executes an UPDATE statement.
    *
    * @param sql  The SQL
    * @param args The arguments to be set on the statement.
    * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
-   * @throws SQLException If statement prepration or execution fails
+   * @throws SQLException If statement preparation or execution fails
    */
   public int update(String sql, Object... args) throws SQLException {
     PreparedStatement ps = connection.prepareStatement(sql);
@@ -156,24 +159,24 @@ public class SqlRunner {
     }
   }
 
-  /*
+  /**
    * Executes a DELETE statement.
    *
    * @param sql  The SQL
    * @param args The arguments to be set on the statement.
    * @return The number of rows impacted or BATCHED_RESULTS if the statements are being batched.
-   * @throws SQLException If statement prepration or execution fails
+   * @throws SQLException If statement preparation or execution fails
    */
   public int delete(String sql, Object... args) throws SQLException {
     return update(sql, args);
   }
 
-  /*
+  /**
    * Executes any string as a JDBC Statement.
    * Good for DDL
    *
    * @param sql The SQL
-   * @throws SQLException If statement prepration or execution fails
+   * @throws SQLException If statement preparation or execution fails
    */
   public void run(String sql) throws SQLException {
     Statement stmt = connection.createStatement();
@@ -188,6 +191,10 @@ public class SqlRunner {
     }
   }
 
+  /**
+   * @deprecated Since 3.5.4, this method is deprecated. Please close the {@link Connection} outside of this class.
+   */
+  @Deprecated
   public void closeConnection() {
     try {
       connection.close();
@@ -215,9 +222,9 @@ public class SqlRunner {
 
   private List<Map<String, Object>> getResults(ResultSet rs) throws SQLException {
     try {
-      List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-      List<String> columns = new ArrayList<String>();
-      List<TypeHandler<?>> typeHandlers = new ArrayList<TypeHandler<?>>();
+      List<Map<String, Object>> list = new ArrayList<>();
+      List<String> columns = new ArrayList<>();
+      List<TypeHandler<?>> typeHandlers = new ArrayList<>();
       ResultSetMetaData rsmd = rs.getMetaData();
       for (int i = 0, n = rsmd.getColumnCount(); i < n; i++) {
         columns.add(rsmd.getColumnLabel(i + 1));
@@ -233,7 +240,7 @@ public class SqlRunner {
         }
       }
       while (rs.next()) {
-        Map<String, Object> row = new HashMap<String, Object>();
+        Map<String, Object> row = new HashMap<>();
         for (int i = 0, n = columns.size(); i < n; i++) {
           String name = columns.get(i);
           TypeHandler<?> handler = typeHandlers.get(i);
@@ -243,10 +250,12 @@ public class SqlRunner {
       }
       return list;
     } finally {
-      try {
-        if (rs != null) rs.close();
-      } catch (Exception e) {
-        //ignore
+      if (rs != null) {
+        try {
+          rs.close();
+        } catch (Exception e) {
+          // ignore
+        }
       }
     }
   }

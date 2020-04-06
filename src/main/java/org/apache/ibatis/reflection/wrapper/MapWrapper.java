@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,15 +24,19 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
+/**
+ * @author Clinton Begin
+ */
 public class MapWrapper extends BaseWrapper {
 
-  private Map<String, Object> map;
+  private final Map<String, Object> map;
 
   public MapWrapper(MetaObject metaObject, Map<String, Object> map) {
     super(metaObject);
     this.map = map;
   }
 
+  @Override
   public Object get(PropertyTokenizer prop) {
     if (prop.getIndex() != null) {
       Object collection = resolveCollection(prop, map);
@@ -42,6 +46,7 @@ public class MapWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public void set(PropertyTokenizer prop, Object value) {
     if (prop.getIndex() != null) {
       Object collection = resolveCollection(prop, map);
@@ -51,18 +56,22 @@ public class MapWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public String findProperty(String name, boolean useCamelCaseMapping) {
     return name;
   }
 
+  @Override
   public String[] getGetterNames() {
     return map.keySet().toArray(new String[map.keySet().size()]);
   }
 
+  @Override
   public String[] getSetterNames() {
     return map.keySet().toArray(new String[map.keySet().size()]);
   }
 
+  @Override
   public Class<?> getSetterType(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -81,6 +90,7 @@ public class MapWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public Class<?> getGetterType(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -99,17 +109,19 @@ public class MapWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public boolean hasSetter(String name) {
     return true;
   }
 
+  @Override
   public boolean hasGetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
       if (map.containsKey(prop.getIndexedName())) {
         MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
         if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
-          return map.containsKey(name);
+          return true;
         } else {
           return metaValue.hasGetter(prop.getChildren());
         }
@@ -121,20 +133,24 @@ public class MapWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
-    HashMap<String, Object> map = new HashMap<String, Object>();
+    HashMap<String, Object> map = new HashMap<>();
     set(prop, map);
-    return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory());
+    return MetaObject.forObject(map, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(), metaObject.getReflectorFactory());
   }
 
+  @Override
   public boolean isCollection() {
     return false;
   }
 
+  @Override
   public void add(Object element) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public <E> void addAll(List<E> element) {
     throw new UnsupportedOperationException();
   }

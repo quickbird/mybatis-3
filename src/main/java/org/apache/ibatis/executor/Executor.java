@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.ibatis.cache.CacheKey;
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
@@ -26,6 +27,9 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
+/**
+ * @author Clinton Begin
+ */
 public interface Executor {
 
   ResultHandler NO_RESULT_HANDLER = null;
@@ -35,6 +39,8 @@ public interface Executor {
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException;
 
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException;
+
+  <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 
   List<BatchResult> flushStatements() throws SQLException;
 
@@ -55,5 +61,7 @@ public interface Executor {
   void close(boolean forceRollback);
 
   boolean isClosed();
+
+  void setExecutorWrapper(Executor executor);
 
 }

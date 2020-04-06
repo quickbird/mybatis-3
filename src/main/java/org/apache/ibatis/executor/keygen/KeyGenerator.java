@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2011 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.sql.Statement;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 
+/**
+ * @author Clinton Begin
+ */
 public interface KeyGenerator {
 
   void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter);

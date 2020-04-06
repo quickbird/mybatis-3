@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2013 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,11 +33,14 @@ import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
+/**
+ * @author Clinton Begin
+ */
 public class XMLStatementBuilder extends BaseBuilder {
 
-  private MapperBuilderAssistant builderAssistant;
-  private XNode context;
-  private String requiredDatabaseId;
+  private final MapperBuilderAssistant builderAssistant;
+  private final XNode context;
+  private final String requiredDatabaseId;
 
   public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context) {
     this(configuration, builderAssistant, context, null);
@@ -54,22 +57,9 @@ public class XMLStatementBuilder extends BaseBuilder {
     String id = context.getStringAttribute("id");
     String databaseId = context.getStringAttribute("databaseId");
 
-    if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) return;
-
-    Integer fetchSize = context.getIntAttribute("fetchSize");
-    Integer timeout = context.getIntAttribute("timeout");
-    String parameterMap = context.getStringAttribute("parameterMap");
-    String parameterType = context.getStringAttribute("parameterType");
-    Class<?> parameterTypeClass = resolveClass(parameterType);
-    String resultMap = context.getStringAttribute("resultMap");
-    String resultType = context.getStringAttribute("resultType");
-    String lang = context.getStringAttribute("lang");
-    LanguageDriver langDriver = getLanguageDriver(lang);
-
-    Class<?> resultTypeClass = resolveClass(resultType);
-    String resultSetType = context.getStringAttribute("resultSetType");
-    StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
-    ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
+    if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) {
+      return;
+    }
 
     String nodeName = context.getNode().getNodeName();
     SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
@@ -82,19 +72,16 @@ public class XMLStatementBuilder extends BaseBuilder {
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
     includeParser.applyIncludes(context.getNode());
 
-    // Parse selectKey after includes,
-    // in case if IncompleteElementException (issue #291)
-    List<XNode> selectKeyNodes = context.evalNodes("selectKey");
-    if (configuration.getDatabaseId() != null) {
-      parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, configuration.getDatabaseId());
-    }
-    parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);
+    String parameterType = context.getStringAttribute("parameterType");
+    Class<?> parameterTypeClass = resolveClass(parameterType);
+
+    String lang = context.getStringAttribute("lang");
+    LanguageDriver langDriver = getLanguageDriver(lang);
+
+    // Parse selectKey after includes and remove them.
+    processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
     // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
-    SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
-    String resultSets = context.getStringAttribute("resultSets");
-    String keyProperty = context.getStringAttribute("keyProperty");
-    String keyColumn = context.getStringAttribute("keyColumn");
     KeyGenerator keyGenerator;
     String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
     keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
@@ -103,16 +90,42 @@ public class XMLStatementBuilder extends BaseBuilder {
     } else {
       keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
           configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
-          ? new Jdbc3KeyGenerator() : new NoKeyGenerator();
+          ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
+
+    SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
+    StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+    Integer fetchSize = context.getIntAttribute("fetchSize");
+    Integer timeout = context.getIntAttribute("timeout");
+    String parameterMap = context.getStringAttribute("parameterMap");
+    String resultType = context.getStringAttribute("resultType");
+    Class<?> resultTypeClass = resolveClass(resultType);
+    String resultMap = context.getStringAttribute("resultMap");
+    String resultSetType = context.getStringAttribute("resultSetType");
+    ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
+    if (resultSetTypeEnum == null) {
+      resultSetTypeEnum = configuration.getDefaultResultSetType();
+    }
+    String keyProperty = context.getStringAttribute("keyProperty");
+    String keyColumn = context.getStringAttribute("keyColumn");
+    String resultSets = context.getStringAttribute("resultSets");
 
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
         fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass,
-        resultSetTypeEnum, flushCache, useCache, resultOrdered, 
+        resultSetTypeEnum, flushCache, useCache, resultOrdered,
         keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets);
   }
-  
-  public void parseSelectKeyNodes(String parentId, List<XNode> list, Class<?> parameterTypeClass, LanguageDriver langDriver, String skRequiredDatabaseId) {
+
+  private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
+    List<XNode> selectKeyNodes = context.evalNodes("selectKey");
+    if (configuration.getDatabaseId() != null) {
+      parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, configuration.getDatabaseId());
+    }
+    parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);
+    removeSelectKeyNodes(selectKeyNodes);
+  }
+
+  private void parseSelectKeyNodes(String parentId, List<XNode> list, Class<?> parameterTypeClass, LanguageDriver langDriver, String skRequiredDatabaseId) {
     for (XNode nodeToHandle : list) {
       String id = parentId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
       String databaseId = nodeToHandle.getStringAttribute("databaseId");
@@ -122,17 +135,18 @@ public class XMLStatementBuilder extends BaseBuilder {
     }
   }
 
-  public void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver, String databaseId) {
+  private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver, String databaseId) {
     String resultType = nodeToHandle.getStringAttribute("resultType");
     Class<?> resultTypeClass = resolveClass(resultType);
     StatementType statementType = StatementType.valueOf(nodeToHandle.getStringAttribute("statementType", StatementType.PREPARED.toString()));
     String keyProperty = nodeToHandle.getStringAttribute("keyProperty");
+    String keyColumn = nodeToHandle.getStringAttribute("keyColumn");
     boolean executeBefore = "BEFORE".equals(nodeToHandle.getStringAttribute("order", "AFTER"));
 
-    //defaults
+    // defaults
     boolean useCache = false;
     boolean resultOrdered = false;
-    KeyGenerator keyGenerator = new NoKeyGenerator();
+    KeyGenerator keyGenerator = NoKeyGenerator.INSTANCE;
     Integer fetchSize = null;
     Integer timeout = null;
     boolean flushCache = false;
@@ -146,48 +160,42 @@ public class XMLStatementBuilder extends BaseBuilder {
     builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
         fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass,
         resultSetTypeEnum, flushCache, useCache, resultOrdered,
-        keyGenerator, keyProperty, null, databaseId, langDriver, null);
+        keyGenerator, keyProperty, keyColumn, databaseId, langDriver, null);
 
     id = builderAssistant.applyCurrentNamespace(id, false);
 
     MappedStatement keyStatement = configuration.getMappedStatement(id, false);
     configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore));
-    nodeToHandle.getParent().getNode().removeChild(nodeToHandle.getNode());
+  }
+
+  private void removeSelectKeyNodes(List<XNode> selectKeyNodes) {
+    for (XNode nodeToHandle : selectKeyNodes) {
+      nodeToHandle.getParent().getNode().removeChild(nodeToHandle.getNode());
+    }
   }
 
   private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
     if (requiredDatabaseId != null) {
-      if (!requiredDatabaseId.equals(databaseId)) {
-        return false;
-      }
-    } else {
-      if (databaseId != null) {
-        return false;
-      }
-      // skip this statement if there is a previous one with a not null databaseId
-      id = builderAssistant.applyCurrentNamespace(id, false);
-      if (this.configuration.hasStatement(id, false)) {
-        MappedStatement previous = this.configuration.getMappedStatement(id, false); // issue #2
-        if (previous.getDatabaseId() != null) {
-          return false;
-        }
-      }
+      return requiredDatabaseId.equals(databaseId);
     }
-    return true;
+    if (databaseId != null) {
+      return false;
+    }
+    id = builderAssistant.applyCurrentNamespace(id, false);
+    if (!this.configuration.hasStatement(id, false)) {
+      return true;
+    }
+    // skip this statement if there is a previous one with a not null databaseId
+    MappedStatement previous = this.configuration.getMappedStatement(id, false); // issue #2
+    return previous.getDatabaseId() == null;
   }
 
   private LanguageDriver getLanguageDriver(String lang) {
-    Class<?> langClass;
-    if (lang == null) {
-      langClass = configuration.getLanguageRegistry().getDefaultDriverClass();
-    } else {
+    Class<? extends LanguageDriver> langClass = null;
+    if (lang != null) {
       langClass = resolveClass(lang);
-      configuration.getLanguageRegistry().register(langClass);
     }
-    if (langClass == null) {
-      langClass = configuration.getLanguageRegistry().getDefaultDriverClass();
-    }
-    return configuration.getLanguageRegistry().getDriver(langClass);
+    return configuration.getLanguageDriver(langClass);
   }
 
 }

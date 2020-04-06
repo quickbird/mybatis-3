@@ -1,5 +1,5 @@
-/*
- *    Copyright 2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,36 +17,36 @@ package org.apache.ibatis.submitted.serializecircular;
 
 import java.io.Serializable;
 
-public class Department implements Serializable{
-	
-	private static final long serialVersionUID = 1L;
-	
-	private Integer id;
-	private Attribute attribute;
-	private Person person;
+public class Department implements Serializable {
 
-	public Integer getId() {
-		return id;
-	}
+  private static final long serialVersionUID = 1L;
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+  private Integer id;
+  private Attribute attribute;
+  private Person person;
 
-	public void setAttribute(Attribute attribute) {
-		this.attribute = attribute;
-	}
+  public Integer getId() {
+    return id;
+  }
 
-	public Attribute getAttribute() {
-		return attribute;
-	}
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-	public void setPerson(Person person) {
-		this.person = person;
-	}
+  public void setAttribute(Attribute attribute) {
+    this.attribute = attribute;
+  }
 
-	public Person getPerson() {
-		return person;
-	}
+  public Attribute getAttribute() {
+    return attribute;
+  }
+
+  public void setPerson(Person person) {
+    this.person = person;
+  }
+
+  public Person getPerson() {
+    return person;
+  }
 
 }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,12 +17,21 @@ package org.apache.ibatis.mapping;
 
 import java.sql.ResultSet;
 
+/**
+ * @author Clinton Begin
+ */
 public enum ResultSetType {
+  /**
+   * behavior with same as unset (driver dependent).
+   *
+   * @since 3.5.0
+   */
+  DEFAULT(-1),
   FORWARD_ONLY(ResultSet.TYPE_FORWARD_ONLY),
   SCROLL_INSENSITIVE(ResultSet.TYPE_SCROLL_INSENSITIVE),
   SCROLL_SENSITIVE(ResultSet.TYPE_SCROLL_SENSITIVE);
 
-  private int value;
+  private final int value;
 
   ResultSetType(int value) {
     this.value = value;

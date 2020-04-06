@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
  */
 package org.apache.ibatis.cache.decorators;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.ibatis.cache.Cache;
 
-/*
- * Lru (first in, first out) cache decorator
+/**
+ * Lru (least recently used) cache decorator.
+ *
+ * @author Clinton Begin
  */
 public class LruCache implements Cache {
 
@@ -36,19 +36,21 @@ public class LruCache implements Cache {
     setSize(1024);
   }
 
+  @Override
   public String getId() {
     return delegate.getId();
   }
 
+  @Override
   public int getSize() {
     return delegate.getSize();
   }
 
   public void setSize(final int size) {
-    // TODO look for a better solution to this, see issue #335
-    keyMap = Collections.synchronizedMap(new LinkedHashMap<Object, Object>(size, .75F, true) {
+    keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
       private static final long serialVersionUID = 4267176411845948333L;
 
+      @Override
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
         if (tooBig) {
@@ -56,31 +58,30 @@ public class LruCache implements Cache {
         }
         return tooBig;
       }
-    });
+    };
   }
 
+  @Override
   public void putObject(Object key, Object value) {
     delegate.putObject(key, value);
     cycleKeyList(key);
   }
 
+  @Override
   public Object getObject(Object key) {
-    keyMap.get(key); //touch
+    keyMap.get(key); // touch
     return delegate.getObject(key);
-
   }
 
+  @Override
   public Object removeObject(Object key) {
     return delegate.removeObject(key);
   }
 
+  @Override
   public void clear() {
     delegate.clear();
     keyMap.clear();
-  }
-
-  public ReadWriteLock getReadWriteLock() {
-    return delegate.getReadWriteLock();
   }
 
   private void cycleKeyList(Object key) {
@@ -92,4 +93,3 @@ public class LruCache implements Cache {
   }
 
 }
-

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Clinton Begin
+ */
 public enum JdbcType {
   /*
    * This is added to enable basic support for the
@@ -54,10 +57,20 @@ public enum JdbcType {
   NVARCHAR(Types.NVARCHAR), // JDK6
   NCHAR(Types.NCHAR), // JDK6
   NCLOB(Types.NCLOB), // JDK6
-  STRUCT(Types.STRUCT);
+  STRUCT(Types.STRUCT),
+  JAVA_OBJECT(Types.JAVA_OBJECT),
+  DISTINCT(Types.DISTINCT),
+  REF(Types.REF),
+  DATALINK(Types.DATALINK),
+  ROWID(Types.ROWID), // JDK6
+  LONGNVARCHAR(Types.LONGNVARCHAR), // JDK6
+  SQLXML(Types.SQLXML), // JDK6
+  DATETIMEOFFSET(-155), // SQL Server 2008
+  TIME_WITH_TIMEZONE(Types.TIME_WITH_TIMEZONE), // JDBC 4.2 JDK8
+  TIMESTAMP_WITH_TIMEZONE(Types.TIMESTAMP_WITH_TIMEZONE); // JDBC 4.2 JDK8
 
   public final int TYPE_CODE;
-  private static Map<Integer,JdbcType> codeLookup = new HashMap<Integer,JdbcType>();
+  private static Map<Integer,JdbcType> codeLookup = new HashMap<>();
 
   static {
     for (JdbcType type : JdbcType.values()) {

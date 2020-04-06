@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,10 +15,13 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+/**
+ * @author Clinton Begin
+ */
 public class IfSqlNode implements SqlNode {
-  private ExpressionEvaluator evaluator;
-  private String test;
-  private SqlNode contents;
+  private final ExpressionEvaluator evaluator;
+  private final String test;
+  private final SqlNode contents;
 
   public IfSqlNode(SqlNode contents, String test) {
     this.test = test;
@@ -26,6 +29,7 @@ public class IfSqlNode implements SqlNode {
     this.evaluator = new ExpressionEvaluator();
   }
 
+  @Override
   public boolean apply(DynamicContext context) {
     if (evaluator.evaluateBoolean(test, context.getBindings())) {
       contents.apply(context);

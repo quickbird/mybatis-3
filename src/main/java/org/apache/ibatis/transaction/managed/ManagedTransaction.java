@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.apache.ibatis.transaction.Transaction;
  * Ignores all commit or rollback requests.
  * By default, it closes the connection but can be configured not to do it.
  *
+ * @author Clinton Begin
+ *
  * @see ManagedTransactionFactory
  */
 public class ManagedTransaction implements Transaction {
@@ -40,7 +42,7 @@ public class ManagedTransaction implements Transaction {
   private DataSource dataSource;
   private TransactionIsolationLevel level;
   private Connection connection;
-  private boolean closeConnection;
+  private final boolean closeConnection;
 
   public ManagedTransaction(Connection connection, boolean closeConnection) {
     this.connection = connection;
@@ -53,6 +55,7 @@ public class ManagedTransaction implements Transaction {
     this.closeConnection = closeConnection;
   }
 
+  @Override
   public Connection getConnection() throws SQLException {
     if (this.connection == null) {
       openConnection();
@@ -60,14 +63,17 @@ public class ManagedTransaction implements Transaction {
     return this.connection;
   }
 
+  @Override
   public void commit() throws SQLException {
     // Does nothing
   }
 
+  @Override
   public void rollback() throws SQLException {
     // Does nothing
   }
 
+  @Override
   public void close() throws SQLException {
     if (this.closeConnection && this.connection != null) {
       if (log.isDebugEnabled()) {
@@ -85,6 +91,11 @@ public class ManagedTransaction implements Transaction {
     if (this.level != null) {
       this.connection.setTransactionIsolation(this.level.getLevel());
     }
+  }
+
+  @Override
+  public Integer getTimeout() throws SQLException {
+    return null;
   }
 
 }

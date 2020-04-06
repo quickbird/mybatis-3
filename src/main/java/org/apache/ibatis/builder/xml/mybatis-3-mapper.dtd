@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
-       Copyright 2009-2013 The MyBatis Team
+       Copyright 2009-2018 the original author or authors.
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
        limitations under the License.
 
 -->
-
 <!ELEMENT mapper (cache-ref | cache | resultMap* | parameterMap* | sql* | insert* | update* | delete* | select* )+>
 <!ATTLIST mapper
-xmlns:fo CDATA #IMPLIED
 namespace CDATA #IMPLIED
 >
 
@@ -35,6 +33,7 @@ eviction CDATA #IMPLIED
 flushInterval CDATA #IMPLIED
 size CDATA #IMPLIED
 readOnly CDATA #IMPLIED
+blocking CDATA #IMPLIED
 >
 
 <!ELEMENT parameterMap (parameter+)?>
@@ -90,6 +89,8 @@ jdbcType CDATA #IMPLIED
 typeHandler CDATA #IMPLIED
 select CDATA #IMPLIED
 resultMap CDATA #IMPLIED
+name CDATA #IMPLIED
+columnPrefix CDATA #IMPLIED
 >
 
 <!ELEMENT arg EMPTY>
@@ -100,6 +101,8 @@ jdbcType CDATA #IMPLIED
 typeHandler CDATA #IMPLIED
 select CDATA #IMPLIED
 resultMap CDATA #IMPLIED
+name CDATA #IMPLIED
+columnPrefix CDATA #IMPLIED
 >
 
 <!ELEMENT collection (constructor?,id*,result*,association*,collection*, discriminator?)>
@@ -116,6 +119,8 @@ notNullColumn CDATA #IMPLIED
 columnPrefix CDATA #IMPLIED
 resultSet CDATA #IMPLIED
 foreignColumn CDATA #IMPLIED
+autoMapping (true|false) #IMPLIED
+fetchType (lazy|eager) #IMPLIED
 >
 
 <!ELEMENT association (constructor?,id*,result*,association*,collection*, discriminator?)>
@@ -131,6 +136,8 @@ notNullColumn CDATA #IMPLIED
 columnPrefix CDATA #IMPLIED
 resultSet CDATA #IMPLIED
 foreignColumn CDATA #IMPLIED
+autoMapping (true|false) #IMPLIED
+fetchType (lazy|eager) #IMPLIED
 >
 
 <!ELEMENT discriminator (case+)>
@@ -167,7 +174,7 @@ parameterMap CDATA #IMPLIED
 parameterType CDATA #IMPLIED
 resultMap CDATA #IMPLIED
 resultType CDATA #IMPLIED
-resultSetType (FORWARD_ONLY | SCROLL_INSENSITIVE | SCROLL_SENSITIVE) #IMPLIED
+resultSetType (FORWARD_ONLY | SCROLL_INSENSITIVE | SCROLL_SENSITIVE | DEFAULT) #IMPLIED
 statementType (STATEMENT|PREPARED|CALLABLE) #IMPLIED
 fetchSize CDATA #IMPLIED
 timeout CDATA #IMPLIED
@@ -199,11 +206,12 @@ lang CDATA #IMPLIED
 resultType CDATA #IMPLIED
 statementType (STATEMENT|PREPARED|CALLABLE) #IMPLIED
 keyProperty CDATA #IMPLIED
+keyColumn CDATA #IMPLIED
 order (BEFORE|AFTER) #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT update (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT update (#PCDATA | selectKey | include | trim | where | set | foreach | choose | if | bind)*>
 <!ATTLIST update
 id CDATA #REQUIRED
 parameterMap CDATA #IMPLIED
@@ -211,6 +219,9 @@ parameterType CDATA #IMPLIED
 timeout CDATA #IMPLIED
 flushCache (true|false) #IMPLIED
 statementType (STATEMENT|PREPARED|CALLABLE) #IMPLIED
+keyProperty CDATA #IMPLIED
+useGeneratedKeys (true|false) #IMPLIED
+keyColumn CDATA #IMPLIED
 databaseId CDATA #IMPLIED
 lang CDATA #IMPLIED
 >
@@ -229,7 +240,7 @@ lang CDATA #IMPLIED
 
 <!-- Dynamic -->
 
-<!ELEMENT include EMPTY>
+<!ELEMENT include (property+)?>
 <!ATTLIST include
 refid CDATA #REQUIRED
 >
@@ -240,24 +251,24 @@ refid CDATA #REQUIRED
  value CDATA #REQUIRED
 >
 
-<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT sql (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 <!ATTLIST sql
 id CDATA #REQUIRED
 lang CDATA #IMPLIED
 databaseId CDATA #IMPLIED
 >
 
-<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 <!ATTLIST trim
 prefix CDATA #IMPLIED
 prefixOverrides CDATA #IMPLIED
 suffix CDATA #IMPLIED
 suffixOverrides CDATA #IMPLIED
 >
-<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if)*>
-<!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT where (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
+<!ELEMENT set (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 
-<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT foreach (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 <!ATTLIST foreach
 collection CDATA #REQUIRED
 item CDATA #IMPLIED
@@ -268,13 +279,13 @@ separator CDATA #IMPLIED
 >
 
 <!ELEMENT choose (when* , otherwise?)>
-<!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT when (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 <!ATTLIST when
 test CDATA #REQUIRED
 >
-<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT otherwise (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 
-<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if)*>
+<!ELEMENT if (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
 <!ATTLIST if
 test CDATA #REQUIRED
 >

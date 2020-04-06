@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * @author Clinton Begin
+ */
 public class NClobTypeHandler extends BaseTypeHandler<String> {
 
   @Override
@@ -34,36 +37,26 @@ public class NClobTypeHandler extends BaseTypeHandler<String> {
   @Override
   public String getNullableResult(ResultSet rs, String columnName)
       throws SQLException {
-    String value = "";
     Clob clob = rs.getClob(columnName);
-    if (clob != null) {
-      int size = (int) clob.length();
-      value = clob.getSubString(1, size);
-    }
-    return value;
+    return toString(clob);
   }
 
   @Override
   public String getNullableResult(ResultSet rs, int columnIndex)
       throws SQLException {
-    String value = "";
     Clob clob = rs.getClob(columnIndex);
-    if (clob != null) {
-      int size = (int) clob.length();
-      value = clob.getSubString(1, size);
-    }
-    return value;
+    return toString(clob);
   }
 
   @Override
   public String getNullableResult(CallableStatement cs, int columnIndex)
       throws SQLException {
-    String value = "";
     Clob clob = cs.getClob(columnIndex);
-    if (clob != null) {
-      int size = (int) clob.length();
-      value = clob.getSubString(1, size);
-    }
-    return value;
+    return toString(clob);
   }
+
+  private String toString(Clob clob) throws SQLException {
+    return clob == null ? null : clob.getSubString(1, (int) clob.length());
+  }
+
 }

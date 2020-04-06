@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,20 +22,26 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * @author Clinton Begin
+ */
 public class PreparedStatementHandler extends BaseStatementHandler {
 
   public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
     super(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
   }
 
+  @Override
   public int update(Statement statement) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
     ps.execute();
@@ -46,17 +52,27 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     return rows;
   }
 
+  @Override
   public void batch(Statement statement) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
     ps.addBatch();
   }
 
+  @Override
   public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
     PreparedStatement ps = (PreparedStatement) statement;
     ps.execute();
-    return resultSetHandler.<E> handleResultSets(ps);
+    return resultSetHandler.handleResultSets(ps);
   }
 
+  @Override
+  public <E> Cursor<E> queryCursor(Statement statement) throws SQLException {
+    PreparedStatement ps = (PreparedStatement) statement;
+    ps.execute();
+    return resultSetHandler.handleCursorResultSets(ps);
+  }
+
+  @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     String sql = boundSql.getSql();
     if (mappedStatement.getKeyGenerator() instanceof Jdbc3KeyGenerator) {
@@ -66,13 +82,14 @@ public class PreparedStatementHandler extends BaseStatementHandler {
       } else {
         return connection.prepareStatement(sql, keyColumnNames);
       }
-    } else if (mappedStatement.getResultSetType() != null) {
-      return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
-    } else {
+    } else if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
       return connection.prepareStatement(sql);
+    } else {
+      return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
     }
   }
 
+  @Override
   public void parameterize(Statement statement) throws SQLException {
     parameterHandler.setParameters((PreparedStatement) statement);
   }

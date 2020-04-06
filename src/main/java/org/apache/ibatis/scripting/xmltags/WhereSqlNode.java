@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2011 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,13 +15,20 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.ibatis.session.Configuration;
 
+/**
+ * @author Clinton Begin
+ */
 public class WhereSqlNode extends TrimSqlNode {
 
-  public WhereSqlNode(Configuration configuration, SqlNode contents) {
-    super(configuration, contents, "WHERE", "AND |OR |AND\n|OR\n|AND\r|OR\r", null, null);
-  }
+  private static List<String> prefixList = Arrays.asList("AND ","OR ","AND\n", "OR\n", "AND\r", "OR\r", "AND\t", "OR\t");
 
+  public WhereSqlNode(Configuration configuration, SqlNode contents) {
+    super(configuration, contents, "WHERE", prefixList, null, null);
+  }
 
 }

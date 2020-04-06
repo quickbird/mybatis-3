@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,12 +22,15 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
-public class DefaultResultHandler implements ResultHandler {
+/**
+ * @author Clinton Begin
+ */
+public class DefaultResultHandler implements ResultHandler<Object> {
 
   private final List<Object> list;
 
   public DefaultResultHandler() {
-    list = new ArrayList<Object>();
+    list = new ArrayList<>();
   }
 
   @SuppressWarnings("unchecked")
@@ -35,7 +38,8 @@ public class DefaultResultHandler implements ResultHandler {
     list = objectFactory.create(List.class);
   }
 
-  public void handleResult(ResultContext context) {
+  @Override
+  public void handleResult(ResultContext<?> context) {
     list.add(context.getResultObject());
   }
 

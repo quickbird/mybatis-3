@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@ import java.util.Map;
 
 import org.apache.ibatis.session.Configuration;
 
+/**
+ * @author Clinton Begin
+ */
 public class Discriminator {
 
   private ResultMapping resultMapping;
   private Map<String, String> discriminatorMap;
 
-  private Discriminator() {
+  Discriminator() {
   }
 
   public static class Builder {
@@ -39,7 +42,7 @@ public class Discriminator {
     public Discriminator build() {
       assert discriminator.resultMapping != null;
       assert discriminator.discriminatorMap != null;
-      assert discriminator.discriminatorMap.size() > 0;
+      assert !discriminator.discriminatorMap.isEmpty();
       //lock down map
       discriminator.discriminatorMap = Collections.unmodifiableMap(discriminator.discriminatorMap);
       return discriminator;

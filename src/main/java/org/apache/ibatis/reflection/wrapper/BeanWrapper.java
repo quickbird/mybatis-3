@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,17 +26,21 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.invoker.Invoker;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
+/**
+ * @author Clinton Begin
+ */
 public class BeanWrapper extends BaseWrapper {
 
-  private Object object;
-  private MetaClass metaClass;
+  private final Object object;
+  private final MetaClass metaClass;
 
   public BeanWrapper(MetaObject metaObject, Object object) {
     super(metaObject);
     this.object = object;
-    this.metaClass = MetaClass.forClass(object.getClass());
+    this.metaClass = MetaClass.forClass(object.getClass(), metaObject.getReflectorFactory());
   }
 
+  @Override
   public Object get(PropertyTokenizer prop) {
     if (prop.getIndex() != null) {
       Object collection = resolveCollection(prop, object);
@@ -46,6 +50,7 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public void set(PropertyTokenizer prop, Object value) {
     if (prop.getIndex() != null) {
       Object collection = resolveCollection(prop, object);
@@ -55,18 +60,22 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public String findProperty(String name, boolean useCamelCaseMapping) {
     return metaClass.findProperty(name, useCamelCaseMapping);
   }
 
+  @Override
   public String[] getGetterNames() {
     return metaClass.getGetterNames();
   }
 
+  @Override
   public String[] getSetterNames() {
     return metaClass.getSetterNames();
   }
 
+  @Override
   public Class<?> getSetterType(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -81,6 +90,7 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public Class<?> getGetterType(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -95,6 +105,7 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public boolean hasSetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -113,6 +124,7 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public boolean hasGetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -131,12 +143,13 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
     MetaObject metaValue;
     Class<?> type = getSetterType(prop.getName());
     try {
       Object newObject = objectFactory.create(type);
-      metaValue = MetaObject.forObject(newObject, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory());
+      metaValue = MetaObject.forObject(newObject, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(), metaObject.getReflectorFactory());
       set(prop, newObject);
     } catch (Exception e) {
       throw new ReflectionException("Cannot set value of property '" + name + "' because '" + name + "' is null and cannot be instantiated on instance of " + type.getName() + ". Cause:" + e.toString(), e);
@@ -173,14 +186,17 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  @Override
   public boolean isCollection() {
     return false;
   }
 
+  @Override
   public void add(Object element) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public <E> void addAll(List<E> list) {
     throw new UnsupportedOperationException();
   }

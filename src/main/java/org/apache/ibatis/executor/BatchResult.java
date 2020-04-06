@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.util.List;
 
 import org.apache.ibatis.mapping.MappedStatement;
 
+/**
+ * @author Jeff Butler
+ */
 public class BatchResult {
 
   private final MappedStatement mappedStatement;
@@ -32,7 +35,7 @@ public class BatchResult {
     super();
     this.mappedStatement = mappedStatement;
     this.sql = sql;
-    this.parameterObjects = new ArrayList<Object>();
+    this.parameterObjects = new ArrayList<>();
   }
 
   public BatchResult(MappedStatement mappedStatement, String sql, Object parameterObject) {

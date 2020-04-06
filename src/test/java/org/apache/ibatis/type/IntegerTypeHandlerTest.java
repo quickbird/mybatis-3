@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,34 +15,70 @@
  */
 package org.apache.ibatis.type;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class IntegerTypeHandlerTest extends BaseTypeHandlerTest {
+class IntegerTypeHandlerTest extends BaseTypeHandlerTest {
 
   private static final TypeHandler<Integer> TYPE_HANDLER = new IntegerTypeHandler();
 
+  @Override
   @Test
   public void shouldSetParameter() throws Exception {
     TYPE_HANDLER.setParameter(ps, 1, 100, null);
     verify(ps).setInt(1, 100);
   }
 
+  @Override
   @Test
-  public void shouldGetResultFromResultSet() throws Exception {
-    when(rs.getInt("column")).thenReturn(100);
-    when(rs.wasNull()).thenReturn(false);
-    assertEquals(new Integer(100), TYPE_HANDLER.getResult(rs, "column"));
+  public void shouldGetResultFromResultSetByName() throws Exception {
+    when(rs.getInt("column")).thenReturn(100, 0);
+    assertEquals(Integer.valueOf(100), TYPE_HANDLER.getResult(rs, "column"));
+    assertEquals(Integer.valueOf(0), TYPE_HANDLER.getResult(rs, "column"));
   }
 
+  @Override
+  @Test
+  public void shouldGetResultNullFromResultSetByName() throws Exception {
+    when(rs.getInt("column")).thenReturn(0);
+    when(rs.wasNull()).thenReturn(true);
+    assertNull(TYPE_HANDLER.getResult(rs, "column"));
+  }
+
+  @Override
+  @Test
+  public void shouldGetResultFromResultSetByPosition() throws Exception {
+    when(rs.getInt(1)).thenReturn(100, 0);
+    assertEquals(Integer.valueOf(100), TYPE_HANDLER.getResult(rs, 1));
+    assertEquals(Integer.valueOf(0), TYPE_HANDLER.getResult(rs, 1));
+  }
+
+  @Override
+  @Test
+  public void shouldGetResultNullFromResultSetByPosition() throws Exception {
+    when(rs.getInt(1)).thenReturn(0);
+    when(rs.wasNull()).thenReturn(true);
+    assertNull(TYPE_HANDLER.getResult(rs, 1));
+  }
+
+  @Override
   @Test
   public void shouldGetResultFromCallableStatement() throws Exception {
-    when(cs.getInt(1)).thenReturn(100);
-    when(cs.wasNull()).thenReturn(false);
-    assertEquals(new Integer(100), TYPE_HANDLER.getResult(cs, 1));
+    when(cs.getInt(1)).thenReturn(100, 0);
+    assertEquals(Integer.valueOf(100), TYPE_HANDLER.getResult(cs, 1));
+    assertEquals(Integer.valueOf(0), TYPE_HANDLER.getResult(cs, 1));
+  }
+
+  @Override
+  @Test
+  public void shouldGetResultNullFromCallableStatement() throws Exception {
+    when(cs.getInt(1)).thenReturn(0);
+    when(cs.wasNull()).thenReturn(true);
+    assertNull(TYPE_HANDLER.getResult(cs, 1));
   }
 
 }

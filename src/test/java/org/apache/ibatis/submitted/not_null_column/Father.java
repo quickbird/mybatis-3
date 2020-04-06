@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,25 +18,31 @@ package org.apache.ibatis.submitted.not_null_column;
 import java.util.List;
 
 public class Father extends Base {
-    private Integer id;
-    private String name;
-    private List<Child> children;
-    public Integer getId() {
-        return id;
-    }
-    public void setId(Integer id) {
-        this.id = id;
-    }
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public List<Child> getChildren() {
-		return children;
-	}
-	public void setChildren(List<Child> children) {
-		this.children = children;
-	}
+  private Integer id;
+  private String name;
+  private List<Child> children;
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public List<Child> getChildren() {
+    return children;
+  }
+
+  public void setChildren(List<Child> children) {
+    this.children = children;
+  }
 }

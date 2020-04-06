@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * @author Clinton Begin
+ */
 public class FloatTypeHandler extends BaseTypeHandler<Float> {
 
   @Override
@@ -31,18 +34,21 @@ public class FloatTypeHandler extends BaseTypeHandler<Float> {
   @Override
   public Float getNullableResult(ResultSet rs, String columnName)
       throws SQLException {
-    return rs.getFloat(columnName);
+    float result = rs.getFloat(columnName);
+    return result == 0 && rs.wasNull() ? null : result;
   }
 
   @Override
   public Float getNullableResult(ResultSet rs, int columnIndex)
       throws SQLException {
-    return rs.getFloat(columnIndex);
+    float result = rs.getFloat(columnIndex);
+    return result == 0 && rs.wasNull() ? null : result;
   }
 
   @Override
   public Float getNullableResult(CallableStatement cs, int columnIndex)
       throws SQLException {
-    return cs.getFloat(columnIndex);
+    float result = cs.getFloat(columnIndex);
+    return result == 0 && cs.wasNull() ? null : result;
   }
 }

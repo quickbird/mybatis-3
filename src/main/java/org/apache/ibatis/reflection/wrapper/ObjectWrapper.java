@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
+/**
+ * @author Clinton Begin
+ */
 public interface ObjectWrapper {
 
   Object get(PropertyTokenizer prop);
@@ -42,11 +45,11 @@ public interface ObjectWrapper {
   boolean hasGetter(String name);
 
   MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory);
-  
+
   boolean isCollection();
-  
-  public void add(Object element);
-  
-  public <E> void addAll(List<E> element);
+
+  void add(Object element);
+
+  <E> void addAll(List<E> element);
 
 }

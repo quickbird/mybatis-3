@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,21 +40,21 @@ public class User {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public BigDecimal getFunkyNumber() {
-	return funkyNumber;
+    return funkyNumber;
   }
-  
+
   public void setFunkyNumber(BigDecimal big) {
-	funkyNumber = big;  
+    funkyNumber = big;
   }
-  
+
   public RoundingMode getRoundingMode() {
-	return roundingMode;
+    return roundingMode;
   }
-  
+
   public void setRoundingMode(RoundingMode mode) {
-	roundingMode = mode;
+    roundingMode = mode;
   }
-  
+
 }

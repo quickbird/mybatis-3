@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,15 +17,19 @@ package org.apache.ibatis.scripting.xmltags;
 
 import java.util.List;
 
+/**
+ * @author Clinton Begin
+ */
 public class ChooseSqlNode implements SqlNode {
-  private SqlNode defaultSqlNode;
-  private List<SqlNode> ifSqlNodes;
+  private final SqlNode defaultSqlNode;
+  private final List<SqlNode> ifSqlNodes;
 
   public ChooseSqlNode(List<SqlNode> ifSqlNodes, SqlNode defaultSqlNode) {
     this.ifSqlNodes = ifSqlNodes;
     this.defaultSqlNode = defaultSqlNode;
   }
 
+  @Override
   public boolean apply(DynamicContext context) {
     for (SqlNode sqlNode : ifSqlNodes) {
       if (sqlNode.apply(context)) {

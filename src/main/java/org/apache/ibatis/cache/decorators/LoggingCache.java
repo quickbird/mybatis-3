@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,36 +15,41 @@
  */
 package org.apache.ibatis.cache.decorators;
 
-import java.util.concurrent.locks.ReadWriteLock;
-
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
+/**
+ * @author Clinton Begin
+ */
 public class LoggingCache implements Cache {
 
-  private static final Log log = LogFactory.getLog(LoggingCache.class);
-
-  private Cache delegate;
+  private final Log log;
+  private final Cache delegate;
   protected int requests = 0;
   protected int hits = 0;
 
   public LoggingCache(Cache delegate) {
     this.delegate = delegate;
+    this.log = LogFactory.getLog(getId());
   }
 
+  @Override
   public String getId() {
     return delegate.getId();
   }
 
+  @Override
   public int getSize() {
     return delegate.getSize();
   }
 
+  @Override
   public void putObject(Object key, Object object) {
     delegate.putObject(key, object);
   }
 
+  @Override
   public Object getObject(Object key) {
     requests++;
     final Object value = delegate.getObject(key);
@@ -57,22 +62,22 @@ public class LoggingCache implements Cache {
     return value;
   }
 
+  @Override
   public Object removeObject(Object key) {
     return delegate.removeObject(key);
   }
 
+  @Override
   public void clear() {
     delegate.clear();
   }
 
-  public ReadWriteLock getReadWriteLock() {
-    return delegate.getReadWriteLock();
-  }
-
+  @Override
   public int hashCode() {
     return delegate.hashCode();
   }
 
+  @Override
   public boolean equals(Object obj) {
     return delegate.equals(obj);
   }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.apache.ibatis.reflection.invoker;
 
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * @author Clinton Begin
+ */
 public interface Invoker {
   Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException;
 

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.ExecutorException;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
@@ -28,6 +29,9 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * @author Clinton Begin
+ */
 public class RoutingStatementHandler implements StatementHandler {
 
   private final StatementHandler delegate;
@@ -50,30 +54,42 @@ public class RoutingStatementHandler implements StatementHandler {
 
   }
 
-  public Statement prepare(Connection connection) throws SQLException {
-    return delegate.prepare(connection);
+  @Override
+  public Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException {
+    return delegate.prepare(connection, transactionTimeout);
   }
 
+  @Override
   public void parameterize(Statement statement) throws SQLException {
     delegate.parameterize(statement);
   }
 
+  @Override
   public void batch(Statement statement) throws SQLException {
     delegate.batch(statement);
   }
 
+  @Override
   public int update(Statement statement) throws SQLException {
     return delegate.update(statement);
   }
 
+  @Override
   public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
-    return delegate.<E>query(statement, resultHandler);
+    return delegate.query(statement, resultHandler);
   }
 
+  @Override
+  public <E> Cursor<E> queryCursor(Statement statement) throws SQLException {
+    return delegate.queryCursor(statement);
+  }
+
+  @Override
   public BoundSql getBoundSql() {
     return delegate.getBoundSql();
   }
 
+  @Override
   public ParameterHandler getParameterHandler() {
     return delegate.getParameterHandler();
   }

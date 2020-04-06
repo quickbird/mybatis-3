@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ public class User {
 
   private Integer id;
   private String name;
+  private User bestFriend;
   private List<User> friendList;
 
   public Integer getId() {
@@ -37,6 +38,14 @@ public class User {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public User getBestFriend() {
+    return bestFriend;
+  }
+
+  public void setBestFriend(User bestFriend) {
+    this.bestFriend = bestFriend;
   }
 
   public List<User> getFriendList() {

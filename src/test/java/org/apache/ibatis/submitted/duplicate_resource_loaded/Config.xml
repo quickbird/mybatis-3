@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-       Copyright 2009-2012 The MyBatis Team
+       Copyright 2009-2016 the original author or authors.
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@
 
 <configuration>
 
-  <properties resource="org/apache/ibatis/builder/mapper.properties">
-    <property name="driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
-  </properties>
+  <properties resource="org/apache/ibatis/databases/blog/blog-derby.properties"/>
 
   <environments default="development">
     <environment id="development">

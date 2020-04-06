@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import org.apache.ibatis.datasource.DataSourceFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
+/**
+ * @author Clinton Begin
+ */
 public class UnpooledDataSourceFactory implements DataSourceFactory {
 
   private static final String DRIVER_PROPERTY_PREFIX = "driver.";
@@ -35,6 +38,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
     this.dataSource = new UnpooledDataSource();
   }
 
+  @Override
   public void setProperties(Properties properties) {
     Properties driverProperties = new Properties();
     MetaObject metaDataSource = SystemMetaObject.forObject(dataSource);
@@ -56,6 +60,7 @@ public class UnpooledDataSourceFactory implements DataSourceFactory {
     }
   }
 
+  @Override
   public DataSource getDataSource() {
     return dataSource;
   }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2016 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,12 +15,19 @@
  */
 package org.apache.ibatis.type;
 
+/**
+ * @author Clinton Begin
+ */
 class ByteArrayUtils {
+
+  private ByteArrayUtils() {
+    // Prevent Instantiation
+  }
+
   static byte[] convertToPrimitiveArray(Byte[] objects) {
     final byte[] bytes = new byte[objects.length];
     for (int i = 0; i < objects.length; i++) {
-      Byte b = objects[i];
-      bytes[i] = b;
+      bytes[i] = objects[i];
     }
     return bytes;
   }
@@ -28,8 +35,7 @@ class ByteArrayUtils {
   static Byte[] convertToObjectArray(byte[] bytes) {
     final Byte[] objects = new Byte[bytes.length];
     for (int i = 0; i < bytes.length; i++) {
-      byte b = bytes[i];
-      objects[i] = b;
+      objects[i] = bytes[i];
     }
     return objects;
   }

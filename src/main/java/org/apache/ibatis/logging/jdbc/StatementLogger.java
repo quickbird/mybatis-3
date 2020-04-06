@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,46 +24,41 @@ import java.sql.Statement;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
-/*
- * Statement proxy to add logging
+/**
+ * Statement proxy to add logging.
+ *
+ * @author Clinton Begin
+ * @author Eduardo Macarron
+ *
  */
 public final class StatementLogger extends BaseJdbcLogger implements InvocationHandler {
 
-  private Statement statement;
+  private final Statement statement;
 
-  private StatementLogger(Statement stmt, Log statementLog) {
-    super(statementLog);
+  private StatementLogger(Statement stmt, Log statementLog, int queryStack) {
+    super(statementLog, queryStack);
     this.statement = stmt;
   }
 
+  @Override
   public Object invoke(Object proxy, Method method, Object[] params) throws Throwable {
     try {
+      if (Object.class.equals(method.getDeclaringClass())) {
+        return method.invoke(this, params);
+      }
       if (EXECUTE_METHODS.contains(method.getName())) {
         if (isDebugEnabled()) {
-          debug("==>  Executing: " + removeBreakingWhitespace((String) params[0]));
+          debug(" Executing: " + removeBreakingWhitespace((String) params[0]), true);
         }
         if ("executeQuery".equals(method.getName())) {
           ResultSet rs = (ResultSet) method.invoke(statement, params);
-          if (rs != null) {
-            return ResultSetLogger.newInstance(rs, getStatementLog());
-          } else {
-            return null;
-          }
+          return rs == null ? null : ResultSetLogger.newInstance(rs, statementLog, queryStack);
         } else {
           return method.invoke(statement, params);
         }
       } else if ("getResultSet".equals(method.getName())) {
         ResultSet rs = (ResultSet) method.invoke(statement, params);
-        if (rs != null) {
-          return ResultSetLogger.newInstance(rs, getStatementLog());
-        } else {
-          return null;
-        }
-      } else if ("equals".equals(method.getName())) {
-        Object ps = params[0];
-        return ps instanceof Proxy && proxy == ps;
-      } else if ("hashCode".equals(method.getName())) {
-        return proxy.hashCode();
+        return rs == null ? null : ResultSetLogger.newInstance(rs, statementLog, queryStack);
       } else {
         return method.invoke(statement, params);
       }
@@ -72,20 +67,25 @@ public final class StatementLogger extends BaseJdbcLogger implements InvocationH
     }
   }
 
-  /*
-   * Creates a logging version of a Statement
+  /**
+   * Creates a logging version of a Statement.
    *
-   * @param stmt - the statement
-   * @return - the proxy
+   * @param stmt
+   *          the statement
+   * @param statementLog
+   *          the statement log
+   * @param queryStack
+   *          the query stack
+   * @return the proxy
    */
-  public static Statement newInstance(Statement stmt, Log statementLog) {
-    InvocationHandler handler = new StatementLogger(stmt, statementLog);
+  public static Statement newInstance(Statement stmt, Log statementLog, int queryStack) {
+    InvocationHandler handler = new StatementLogger(stmt, statementLog, queryStack);
     ClassLoader cl = Statement.class.getClassLoader();
     return (Statement) Proxy.newProxyInstance(cl, new Class[]{Statement.class}, handler);
   }
 
-  /*
-   * return the wrapped statement
+  /**
+   * return the wrapped statement.
    *
    * @return the statement
    */

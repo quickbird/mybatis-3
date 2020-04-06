@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,64 +13,39 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package org.apache.ibatis.submitted.generictypes;
 
-import java.io.PrintWriter;
 import java.io.Reader;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
-import junit.framework.Assert;
-
+import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.jdbc.ScriptRunner;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class GenericTypesTest {
+class GenericTypesTest {
 
   private SqlSessionFactory sqlSessionFactory;
 
-  @Before
-  public void setUp() throws Exception {
-    Connection conn = null;
-
-    try {
-      Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:generictypes", "sa", "");
-
-      Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/generictypes/CreateDB.sql");
-
-      ScriptRunner runner = new ScriptRunner(conn);
-      runner.setLogWriter(null);
-      runner.setErrorLogWriter(new PrintWriter(System.err));
-      runner.runScript(reader);
-      conn.commit();
-      reader.close();
-
-      reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/generictypes/Config.xml");
+  @BeforeEach
+  void setUp() throws Exception {
+    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/generictypes/Config.xml")) {
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-      reader.close();
-    } finally {
-      if (conn != null) {
-        conn.close();
-      }
     }
+
+    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/generictypes/CreateDB.sql");
   }
 
   @Test
-  public void testShouldGetAListOfMaps() throws Exception {
-    SqlSession sqlSession = sqlSessionFactory.openSession();
-    try {
+  void testShouldGetAListOfMaps() {
+    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       Mapper mapper = sqlSession.getMapper(Mapper.class);
       Group group = mapper.getGroup();
-      Assert.assertNotNull(group.getOwner());
-    } finally {
-      sqlSession.close();
+      Assertions.assertNotNull(group.getOwner());
     }
   }
 

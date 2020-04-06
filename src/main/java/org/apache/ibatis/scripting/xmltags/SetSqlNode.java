@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2018 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,12 +15,20 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.ibatis.session.Configuration;
 
+/**
+ * @author Clinton Begin
+ */
 public class SetSqlNode extends TrimSqlNode {
 
+  private static final List<String> COMMA = Collections.singletonList(",");
+
   public SetSqlNode(Configuration configuration,SqlNode contents) {
-    super(configuration, contents, "SET", null, null, ",");
+    super(configuration, contents, "SET", COMMA, null, COMMA);
   }
 
 }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,44 +22,40 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class UtilityTester {
-	
-	public static void serializeAndDeserializeObject(Object myObject){
 
-		try {
-			deserialzeObject(serializeObject(myObject));
-		} catch (IOException e) {
-			System.out.println("Exception: " + e.toString());
-		}
-	}
+  public static void serializeAndDeserializeObject(Object myObject) {
 
-	private static byte[] serializeObject(Object myObject) throws IOException {
-		try {
-			ByteArrayOutputStream myByteArrayOutputStream = new ByteArrayOutputStream();
+    try {
+      deserialzeObject(serializeObject(myObject));
+    } catch (IOException e) {
+      System.out.println("Exception: " + e.toString());
+    }
+  }
 
-			// Serialize to a byte array
-			ObjectOutputStream myObjectOutputStream = new ObjectOutputStream(myByteArrayOutputStream) ;
-			myObjectOutputStream.writeObject(myObject);
-			myObjectOutputStream.close();
+  private static byte[] serializeObject(Object myObject) throws IOException {
+    try {
+      ByteArrayOutputStream myByteArrayOutputStream = new ByteArrayOutputStream();
 
-			// Get the bytes of the serialized object
-			byte[] myResult = myByteArrayOutputStream.toByteArray();
-			return myResult;
-		} catch (Exception anException) {
-			throw new RuntimeException("Problem serializing: " + anException.toString(), anException);
-		}
-	}
+      // Serialize to a byte array
+      try (ObjectOutputStream myObjectOutputStream = new ObjectOutputStream(myByteArrayOutputStream)) {
+        myObjectOutputStream.writeObject(myObject);
+      }
 
-	private static Object deserialzeObject(byte[] aSerializedObject) {
-		try {
-			// Deserialize from a byte array
-			ObjectInputStream myObjectInputStream = new ObjectInputStream(new ByteArrayInputStream(aSerializedObject));
-			Object myResult = myObjectInputStream.readObject();
-			myObjectInputStream.close();
+      // Get the bytes of the serialized object
+      byte[] myResult = myByteArrayOutputStream.toByteArray();
+      return myResult;
+    } catch (Exception anException) {
+      throw new RuntimeException("Problem serializing: " + anException.toString(), anException);
+    }
+  }
 
-			return myResult;
-		} catch (Exception anException) {
-			throw new RuntimeException("Problem deserializing", anException);
-		}
-	}
+  private static Object deserialzeObject(byte[] aSerializedObject) {
+    // Deserialize from a byte array
+    try (ObjectInputStream myObjectInputStream = new ObjectInputStream(new ByteArrayInputStream(aSerializedObject))) {
+      return myObjectInputStream.readObject();
+    } catch (Exception anException) {
+      throw new RuntimeException("Problem deserializing", anException);
+    }
+  }
 
 }

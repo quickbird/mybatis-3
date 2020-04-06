@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,13 +15,16 @@
  */
 package org.apache.ibatis.executor;
 
+import java.lang.reflect.Array;
+import java.util.List;
+
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.session.Configuration;
 
-import java.lang.reflect.Array;
-import java.util.List;
-
+/**
+ * @author Andrew Gustafson
+ */
 public class ResultExtractor {
   private final Configuration configuration;
   private final ObjectFactory objectFactory;
@@ -40,8 +43,16 @@ public class ResultExtractor {
       MetaObject metaObject = configuration.newMetaObject(value);
       metaObject.addAll(list);
     } else if (targetType != null && targetType.isArray()) {
-      Object[] array = (Object[]) Array.newInstance(targetType.getComponentType(), list.size());
-      value = list.toArray(array);
+      Class<?> arrayComponentType = targetType.getComponentType();
+      Object array = Array.newInstance(arrayComponentType, list.size());
+      if (arrayComponentType.isPrimitive()) {
+        for (int i = 0; i < list.size(); i++) {
+          Array.set(array, i, list.get(i));
+        }
+        value = array;
+      } else {
+        value = list.toArray((Object[])array);
+      }
     } else {
       if (list != null && list.size() > 1) {
         throw new ExecutorException("Statement returned more than one row, where no more than one was expected.");

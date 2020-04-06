@@ -1,17 +1,17 @@
-/*
- * Copyright 2012 MyBatis.org.
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 package org.apache.ibatis.submitted.language;
 
@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.SqlSource;
@@ -42,6 +43,7 @@ public class VelocitySqlSource implements SqlSource {
   private final Template script;
 
   static {
+    Velocity.setProperty("runtime.log", "target/velocity.log");
     Velocity.init();
   }
 
@@ -50,7 +52,9 @@ public class VelocitySqlSource implements SqlSource {
     try {
       RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
       StringReader reader = new StringReader(scriptText);
-      SimpleNode node = runtimeServices.parse(reader, "Template name");
+      Template template = new Template();
+      template.setName("Template name");
+      SimpleNode node = runtimeServices.parse(reader, template);
       script = new Template();
       script.setRuntimeServices(runtimeServices);
       script.setData(node);
@@ -60,6 +64,7 @@ public class VelocitySqlSource implements SqlSource {
     }
   }
 
+  @Override
   public BoundSql getBoundSql(Object parameterObject) {
     Map<String, Object> bindings = createBindings(parameterObject, configuration);
     VelocityContext context = new VelocityContext(bindings);
@@ -77,7 +82,7 @@ public class VelocitySqlSource implements SqlSource {
   }
 
   public static Map<String, Object> createBindings(Object parameterObject, Configuration configuration) {
-    Map<String, Object> bindings = new HashMap<String, Object>();
+    Map<String, Object> bindings = new HashMap<>();
     bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
     bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
     bindings.put("it", new IteratorParameter(bindings));

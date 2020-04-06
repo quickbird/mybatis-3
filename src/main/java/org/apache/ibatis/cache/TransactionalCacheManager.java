@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2011 The MyBatis Team
+/**
+ *    Copyright 2009-2019 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,12 +20,19 @@ import java.util.Map;
 
 import org.apache.ibatis.cache.decorators.TransactionalCache;
 
+/**
+ * @author Clinton Begin
+ */
 public class TransactionalCacheManager {
 
-  private Map<Cache, TransactionalCache> transactionalCaches = new HashMap<Cache, TransactionalCache>();
+  private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {
     getTransactionalCache(cache).clear();
+  }
+
+  public Object getObject(Cache cache, CacheKey key) {
+    return getTransactionalCache(cache).getObject(key);
   }
 
   public void putObject(Cache cache, CacheKey key, Object value) {
@@ -45,12 +52,7 @@ public class TransactionalCacheManager {
   }
 
   private TransactionalCache getTransactionalCache(Cache cache) {
-    TransactionalCache txCache = transactionalCaches.get(cache);
-    if (txCache == null) {
-      txCache = new TransactionalCache(cache);
-      transactionalCaches.put(cache, txCache);
-    }
-    return txCache;
+    return transactionalCaches.computeIfAbsent(cache, TransactionalCache::new);
   }
 
 }

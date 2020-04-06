@@ -1,5 +1,5 @@
 --
---    Copyright 2009-2012 The MyBatis Team
+--    Copyright 2009-2017 the original author or authors.
 --
 --    Licensed under the Apache License, Version 2.0 (the "License");
 --    you may not use this file except in compliance with the License.
@@ -123,6 +123,15 @@ BEGIN ATOMIC
 END
 go
 
+create procedure sptest.getnamesLowHigh(in lowestId int, in highestId int)
+modifies sql data
+dynamic result sets 1
+BEGIN ATOMIC
+  declare cur cursor for select * from sptest.names where id >= lowestId and id <= highestId;
+  open cur;
+END
+go
+
 create procedure sptest.arraytest(in ids int array, out rowsrequested integer, out returnedids int array)
 modifies sql data
 dynamic result sets 1
@@ -132,4 +141,49 @@ begin atomic
   set returnedids = array [7, 8, 9, 10];
   open cur;
 end
+go
+
+create procedure sptest.echoDate(in inputDate date, out outputDate date)
+begin atomic
+  set outputDate = inputDate; 
+end
+go
+
+create table sptest.books (
+  id integer not null,
+  name varchar(20),
+  genre1 integer,
+  genre2 integer,
+  primary key(id)
+)
+go
+
+insert into sptest.books (id, name, genre1, genre2) values
+(1, 'Book1', 10, 11),
+(2, 'Book2', 10, 12),
+(3, 'Book3', 10, 11)
+go
+
+create table sptest.genres (
+  id1 integer,
+  id2 integer,
+  name varchar(20)
+)
+go
+
+insert into sptest.genres (id1, id2, name) values
+(10, 11, 'Genre1'),
+(10, 12, 'Genre2'),
+(10, 13, 'Genre3')
+go
+
+create procedure sptest.getbookandgenre()
+modifies sql data
+dynamic result sets 2
+BEGIN ATOMIC
+  declare cur1 cursor for select * from sptest.books order by id;
+  declare cur2 cursor for select * from sptest.genres;
+  open cur1;
+  open cur2;
+END
 go

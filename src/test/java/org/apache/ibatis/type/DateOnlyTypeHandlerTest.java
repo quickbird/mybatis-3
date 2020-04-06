@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,38 +15,75 @@
  */
 package org.apache.ibatis.type;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DateOnlyTypeHandlerTest extends BaseTypeHandlerTest {
+class DateOnlyTypeHandlerTest extends BaseTypeHandlerTest {
 
   private static final TypeHandler<Date> TYPE_HANDLER = new DateOnlyTypeHandler();
   private static final Date DATE = new Date();
   private static final java.sql.Date SQL_DATE = new java.sql.Date(DATE.getTime());
 
+  @Override
   @Test
   public void shouldSetParameter() throws Exception {
     TYPE_HANDLER.setParameter(ps, 1, DATE, null);
     verify(ps).setDate(1, new java.sql.Date(DATE.getTime()));
   }
 
+  @Override
   @Test
-  public void shouldGetResultFromResultSet() throws Exception {
+  public void shouldGetResultFromResultSetByName() throws Exception {
     when(rs.getDate("column")).thenReturn(SQL_DATE);
-    when(rs.wasNull()).thenReturn(false);
     assertEquals(DATE, TYPE_HANDLER.getResult(rs, "column"));
+    verify(rs, never()).wasNull();
   }
 
+  @Override
+  @Test
+  public void shouldGetResultNullFromResultSetByName() throws Exception {
+    when(rs.getDate("column")).thenReturn(null);
+    assertNull(TYPE_HANDLER.getResult(rs, "column"));
+    verify(rs, never()).wasNull();
+  }
+
+  @Override
+  @Test
+  public void shouldGetResultFromResultSetByPosition() throws Exception {
+    when(rs.getDate(1)).thenReturn(SQL_DATE);
+    assertEquals(DATE, TYPE_HANDLER.getResult(rs, 1));
+    verify(rs, never()).wasNull();
+  }
+
+  @Override
+  @Test
+  public void shouldGetResultNullFromResultSetByPosition() throws Exception {
+    when(rs.getDate(1)).thenReturn(null);
+    assertNull(TYPE_HANDLER.getResult(rs, 1));
+    verify(rs, never()).wasNull();
+  }
+
+  @Override
   @Test
   public void shouldGetResultFromCallableStatement() throws Exception {
     when(cs.getDate(1)).thenReturn(SQL_DATE);
-    when(cs.wasNull()).thenReturn(false);
     assertEquals(DATE, TYPE_HANDLER.getResult(cs, 1));
+    verify(cs, never()).wasNull();
+  }
+
+  @Override
+  @Test
+  public void shouldGetResultNullFromCallableStatement() throws Exception {
+    when(cs.getDate(1)).thenReturn(null);
+    assertNull(TYPE_HANDLER.getResult(cs, 1));
+    verify(cs, never()).wasNull();
   }
 
 }

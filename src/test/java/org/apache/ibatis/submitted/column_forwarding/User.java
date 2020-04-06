@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2015 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,12 +45,12 @@ public class User {
   public void setGroup(Group group) {
     this.group = group;
   }
-  
+
   public String getState() {
-	return state;
+    return state;
   }
 
   public void setState(String state) {
-	  this.state = state;
+    this.state = state;
   }
 }

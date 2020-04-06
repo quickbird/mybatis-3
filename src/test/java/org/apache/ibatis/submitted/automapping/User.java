@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2017 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,10 +15,15 @@
  */
 package org.apache.ibatis.submitted.automapping;
 
+import java.util.List;
+
 public class User {
 
   private Integer id;
   private String name;
+  private Long phone; // phone number of Long type
+
+  private List<Pet> pets;
 
   public Integer getId() {
     return id;
@@ -34,5 +39,21 @@ public class User {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Long getPhone() {
+    return phone;
+  }
+
+  public void setPhone(Long phone) {
+    this.phone = phone;
+  }
+
+  public List<Pet> getPets() {
+    return pets;
+  }
+
+  public void setPets(List<Pet> pets) {
+    this.pets = pets;
   }
 }

@@ -1,5 +1,5 @@
-/*
- *    Copyright 2009-2012 The MyBatis Team
+/**
+ *    Copyright 2009-2020 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ import javax.sql.DataSource;
 import org.apache.ibatis.datasource.DataSourceException;
 import org.apache.ibatis.datasource.DataSourceFactory;
 
+/**
+ * @author Clinton Begin
+ */
 public class JndiDataSourceFactory implements DataSourceFactory {
 
   public static final String INITIAL_CONTEXT = "initial_context";
@@ -34,9 +37,10 @@ public class JndiDataSourceFactory implements DataSourceFactory {
 
   private DataSource dataSource;
 
+  @Override
   public void setProperties(Properties properties) {
     try {
-      InitialContext initCtx = null;
+      InitialContext initCtx;
       Properties env = getEnvProperties(properties);
       if (env == null) {
         initCtx = new InitialContext();
@@ -44,8 +48,7 @@ public class JndiDataSourceFactory implements DataSourceFactory {
         initCtx = new InitialContext(env);
       }
 
-      if (properties.containsKey(INITIAL_CONTEXT)
-          && properties.containsKey(DATA_SOURCE)) {
+      if (properties.containsKey(INITIAL_CONTEXT) && properties.containsKey(DATA_SOURCE)) {
         Context ctx = (Context) initCtx.lookup(properties.getProperty(INITIAL_CONTEXT));
         dataSource = (DataSource) ctx.lookup(properties.getProperty(DATA_SOURCE));
       } else if (properties.containsKey(DATA_SOURCE)) {
@@ -57,6 +60,7 @@ public class JndiDataSourceFactory implements DataSourceFactory {
     }
   }
 
+  @Override
   public DataSource getDataSource() {
     return dataSource;
   }
